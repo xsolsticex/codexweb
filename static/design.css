@@ -44,3 +44,7 @@ footer:before{background:#090909;top:-55px;height:56px;-webkit-mask-position:-41
 .hero-art:after{opacity:.35;z-index:0;pointer-events:none}.hero-serial,.orbit,.art-caption{text-shadow:0 1px 4px #000,0 0 8px #000}.sun{z-index:1}.hero-watermark{opacity:.5;z-index:0;pointer-events:none}
 @media(max-width:800px){.hero-photo{object-position:55% 60%}}
 @media(max-width:520px){.hero-photo{object-position:50% 62%;-webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 9%,#000 94%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0%,#000 9%,#000 94%,transparent 100%)}.hero-art:after{opacity:.2}}
+/* Retain the photograph's real transparent paper tears on every side. */
+.hero-photo{inset:18px 22px 28px 12px;width:calc(100% - 34px);height:calc(100% - 46px);object-fit:contain;object-position:center;-webkit-mask-image:none;mask-image:none;transform:rotate(2deg);filter:drop-shadow(8px 12px 8px #000b)}
+@media(max-width:800px){.hero-photo{inset:20px 18px 25px 8px;width:calc(100% - 26px);height:calc(100% - 45px);object-position:center}}
+@media(max-width:520px){.hero-photo{inset:16px 30px 20px 8px;width:calc(100% - 38px);height:calc(100% - 36px);object-position:center;-webkit-mask-image:none;mask-image:none;transform:rotate(2deg)}}
