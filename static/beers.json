@@ -1,0 +1,242 @@
+[
+  {
+    "nombre": "Menduiña Loira (España, Galicia)",
+    "tipo": "Kölsch (Lager alemana)",
+    "graduacion": "5%",
+    "precio": "4.50€"
+  },
+  {
+    "nombre": "Nasa Orixinal (España, Galicia)",
+    "tipo": "Pilsner",
+    "graduacion": "5%",
+    "precio": "2.75€"
+  },
+  {
+    "nombre": "Nasa Rede (España, Galicia)",
+    "tipo": "Bohemian Pilsner",
+    "graduacion": "6%",
+    "precio": "2.95€"
+  },
+  {
+    "nombre": "Pacifico (México, Mazatlán)",
+    "tipo": "Lager",
+    "graduacion": "4.4%",
+    "precio": "2.90€"
+  },
+  {
+    "nombre": "Singha (Tailandia, Bangkok)",
+    "tipo": "Premium Lager",
+    "graduacion": "5%",
+    "precio": "2.95€"
+  },
+  {
+    "nombre": "Naparbier Paradise? (España, Navarra)",
+    "tipo": "German Pilsner",
+    "graduacion": "4.8%",
+    "precio": "3.50€"
+  },
+  {
+    "nombre": "Sapporo (Japón, Hokkaidō)",
+    "tipo": "Lager",
+    "graduacion": "5%",
+    "precio": "4.95€"
+  },
+  {
+    "nombre": "Cusqueña (Perú, Cusco)",
+    "tipo": "Dark Lager",
+    "graduacion": "5.5%",
+    "precio": "3.25€"
+  },
+  {
+    "nombre": "Sapporo Black (Japón, Hokkaidō)",
+    "tipo": "Dark Lager",
+    "graduacion": "5%",
+    "precio": "4.95€"
+  },
+  {
+    "nombre": "Cooper's Pale Ale (Australia, Adelaide)",
+    "tipo": "Pale Ale",
+    "graduacion": "4.5%",
+    "precio": "3.20€"
+  },
+  {
+    "nombre": "Cooper's Sparkling Ale",
+    "tipo": "Australian Ale",
+    "graduacion": "5.8%",
+    "precio": "3.35€"
+  },
+  {
+    "nombre": "Ichnusa (Italia, Cerdeña)",
+    "tipo": "Lager",
+    "graduacion": "5%",
+    "precio": "3.75€"
+  },
+  {
+    "nombre": "Altenmünster Urig Würzig (Alemania, Baviera)",
+    "tipo": "Kellerbier",
+    "graduacion": "5.1%",
+    "precio": "4.25€"
+  },
+  {
+    "nombre": "La Goudale à l'ancienne blonde (Francia, Hauts-de-France)",
+    "tipo": "French blonde",
+    "graduacion": "7.2%",
+    "precio": "3.95€"
+  },
+  {
+    "nombre": "Schlosser Alt (Alemania, Düsseldorf)",
+    "tipo": "Altbier",
+    "graduacion": "4.8%",
+    "precio": "3.95€"
+  },
+  {
+    "nombre": "Maredsous 6 (Bélgica, Valonia)",
+    "tipo": "Belgian Blonde Ale",
+    "graduacion": "6°",
+    "precio": "3.20€"
+  },
+  {
+    "nombre": "La Chouffe (Bélgica, Achouffe)",
+    "tipo": "Belgian Strong Blonde Ale",
+    "graduacion": "8%",
+    "precio": "3.80€"
+  },
+  {
+    "nombre": "Delirium Tremens (Bélgica, Flandes Oriental)",
+    "tipo": "Belgian Strong Golden Ale",
+    "graduacion": "8.5%",
+    "precio": "4.50€ (3.95€ durante septiembre de 2026)"
+  },
+  {
+    "nombre": "Orval (Bélgica, Valonia)",
+    "tipo": "Belgian Trappist Ale",
+    "graduacion": "6.2%",
+    "precio": "4.30€"
+  },
+  {
+    "nombre": "Tripel Karmeliet (Bélgica, Flandes)",
+    "tipo": "Belgian Tripel",
+    "graduacion": "8.4%",
+    "precio": "4.50€"
+  },
+  {
+    "nombre": "Menduiña Duir (España, Galicia)",
+    "tipo": "Red Ale",
+    "graduacion": "5.5%",
+    "precio": "4.80€"
+  },
+  {
+    "nombre": "Spitfire (Reino Unido, Kent)",
+    "tipo": "Kentish Amber Ale",
+    "graduacion": "4.2%",
+    "precio": "5.50€"
+  },
+  {
+    "nombre": "Traquair Jacobite (Escocia, Scottish Borders)",
+    "tipo": "Strong Ale",
+    "graduacion": "8%",
+    "precio": "5.50€"
+  },
+  {
+    "nombre": "Weihenstephaner Hefe Weissbier (Alemania, Baviera)",
+    "tipo": "Weissbier",
+    "graduacion": "5.4%",
+    "precio": "3.75€"
+  },
+  {
+    "nombre": "Weihenstephaner Vitus (Alemania, Baviera)",
+    "tipo": "Weizenbock",
+    "graduacion": "7.7%",
+    "precio": "3.90€"
+  },
+  {
+    "nombre": "Köstritzer (Alemania, Turingia)",
+    "tipo": "Schwarzbier",
+    "graduacion": "4.8%",
+    "precio": "3.50€"
+  },
+  {
+    "nombre": "Menduiña María Soliña (España, Galicia)",
+    "tipo": "Smocked Bock",
+    "graduacion": "7%",
+    "precio": "4.80€"
+  },
+  {
+    "nombre": "Samuel Smith's Nut Brown Ale (Reino Unido, Yorkshire)",
+    "tipo": "English Brown Ale",
+    "graduacion": "5%",
+    "precio": "4.50€"
+  },
+  {
+    "nombre": "Maredsous 8 Brune (Bélgica, Valonia)",
+    "tipo": "Abbey Brune",
+    "graduacion": "8°",
+    "precio": "3.50€"
+  },
+  {
+    "nombre": "St. Bernardus Pater 6 (Bélgica, Flandes)",
+    "tipo": "Belgian Abbey Dubbel",
+    "graduacion": "6.7%",
+    "precio": "3.50€"
+  },
+  {
+    "nombre": "St. Bernardus ABT 12 (Bélgica, Flandes)",
+    "tipo": "Belgian Abbey Quadrupel",
+    "graduacion": "10%",
+    "precio": "4.95€"
+  },
+  {
+    "nombre": "Chimay Grande Reserve (75cl) (Bélgica, Valonia)",
+    "tipo": "Strong Dark Ale",
+    "graduacion": "9%",
+    "precio": "10.95€"
+  },
+  {
+    "nombre": "Gouden Carolus Ambrio (Bélgica, Malinas)",
+    "tipo": "Belgian Strong Amber Ale",
+    "graduacion": "8%",
+    "precio": "3.50€"
+  },
+  {
+    "nombre": "Gouden Carolus Whisky Infused (Bélgica, Malinas)",
+    "tipo": "Belgian Strong Dark Ale",
+    "graduacion": "11.7%",
+    "precio": "5.95€"
+  },
+  {
+    "nombre": "Kasteel Donker (Bélgica, Flandes)",
+    "tipo": "Quadrupel Strong Ale",
+    "graduacion": "11%",
+    "precio": "4.20€"
+  },
+  {
+    "nombre": "Kasteel Barista (Bélgica, Flandes)",
+    "tipo": "Quadrupel Strong Ale",
+    "graduacion": "11%",
+    "precio": "4.60€"
+  },
+  {
+    "nombre": "Maredsous 10 (Bélgica, Valonia)",
+    "tipo": "Abbey Tripel Ale",
+    "graduacion": "10%",
+    "precio": "3.95€"
+  },
+  {
+    "nombre": "Belzebuth Violette (Francia, Hauts-de-France)",
+    "tipo": "Witbier aromatizada",
+    "graduacion": "2.8%",
+    "precio": "4.95€"
+  },
+  {
+    "nombre": "Lindemans (grosella negra, manzana, melocotón, frambuesa y cereza) (Bélgica, Pajottenland)",
+    "tipo": "Lambics afrutadas",
+    "graduacion": "2.5%-3.5%",
+    "precio": "3.50€"
+  },
+  {
+    "nombre": "Chérie (frambuesa, granada, melocotón, maracuyá y cereza) (Bélgica, Flandes)",
+    "tipo": "Lambic afrutadas",
+    "graduacion": "3.5%",
+    "precio": "4.50€"
+  }
+]

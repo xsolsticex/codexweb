@@ -11,6 +11,9 @@ DB = DATA / 'shop.db'
 SESSIONS = {}
 MAX_IMAGE_BYTES = 4 * 1024 * 1024
 
+
+os.environ["ADMIN_PASSWORD"] = ""
+
 def product_image(data):
     if not isinstance(data, str): raise ValueError('Imagen no válida')
     try:
