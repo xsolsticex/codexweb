@@ -1,6 +1,7 @@
 import json, os, sqlite3, secrets, hashlib, hmac, time, base64, io, re, warnings
 from PIL import Image, UnidentifiedImageError
 from catalog_import import import_once
+from photo_catalog import apply_photos, catalog_image_exists, with_photo_credit
 from pathlib import Path
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from http.cookies import SimpleCookie
@@ -57,6 +58,7 @@ def initialize():
             c.executemany('INSERT INTO products(name,brewery,style,price,stock,abv,volume,description,color) VALUES(?,?,?,?,?,?,?,?,?)', beers)
             c.execute("INSERT INTO settings VALUES('seeded','1')")
         import_once(c, CATALOG_PATH)
+        apply_photos(c)
 
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self,*a,**kw): super().__init__(*a,directory=str(ROOT / 'static'),**kw)
@@ -86,7 +88,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.wfile.write(raw)
             return
         if route=='/api/products':
-            with connect() as c: products=[dict(r) for r in c.execute('SELECT * FROM products ORDER BY id')]
+            with connect() as c: products=[with_photo_credit(dict(r)) for r in c.execute('SELECT * FROM products ORDER BY id')]
             return self.send_json(200,products)
         if route=='/api/session': return self.send_json(200,{'authenticated':bool(self.admin()),'configured':bool(os.environ.get('ADMIN_PASSWORD'))})
         if route=='/api/orders':
@@ -155,7 +157,7 @@ class Handler(SimpleHTTPRequestHandler):
                             keys.append('abv_label'); values.append(d['abv_label'])
                         if 'image_data' in d or 'image' in d:
                             image = d.get('image', '')
-                            if not isinstance(image,str) or (image and (not re.fullmatch(r'/uploads/[a-f0-9]{32}\.webp',image) or not (DATA / 'uploads' / image.rsplit('/',1)[-1]).is_file())):
+                            if not isinstance(image,str) or (image and not catalog_image_exists(image) and (not re.fullmatch(r'/uploads/[a-f0-9]{32}\.webp',image) or not (DATA / 'uploads' / image.rsplit('/',1)[-1]).is_file())):
                                 raise ValueError('Imagen no válida')
                             if d.get('image_data'): image = product_image(d['image_data'])
                             keys.append('image'); values.append(image)
