@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 580">
+<defs><linearGradient id="skin" x2="1" y2=".4"><stop stop-color="#373634"/><stop offset=".4" stop-color="#b3a897"/><stop offset=".58" stop-color="#d1c5ab"/><stop offset="1" stop-color="#4c443c"/></linearGradient><filter id="rough"><feTurbulence baseFrequency=".08" numOctaves="3" seed="9" result="noise"/><feColorMatrix in="noise" type="saturate" values="0" result="gray"/><feBlend in="SourceGraphic" in2="gray" mode="multiply"/></filter></defs>
+<path d="M70 182 35 170 22 220 63 241M390 182l35-12 13 50-41 21M77 341l-43 21 20 52 42-24M383 341l43 21-20 52-42-24" fill="#3f211e" stroke="#827161" stroke-width="3"/>
+<path d="M230 43C121 43 69 111 65 216L79 354Q96 469 230 531Q364 469 381 354L395 216C391 111 339 43 230 43Z" fill="url(#skin)" stroke="#181614" stroke-width="6"/>
+<path d="M230 43C121 43 69 111 65 216L79 354Q96 469 230 531Q364 469 381 354L395 216C391 111 339 43 230 43Z" fill="#9d8e76" opacity=".32" filter="url(#rough)"/>
+<path d="m103 200 83 7-21 48-58-9ZM357 200l-83 7 21 48 58-9Z" fill="#090909" stroke="#4a3930" stroke-width="8"/>
+<path d="m118 216 45 3-12 14-27-4ZM342 216l-45 3 12 14 27-4Z" fill="#5c0d0c"/>
+<path d="m230 245-22 85 22-13 22 13Z" fill="#17120f" stroke="#665241" stroke-width="3"/>
+<path d="M135 376Q230 340 325 376L303 415Q230 442 157 415Z" fill="#151210" stroke="#49382b" stroke-width="5"/>
+<g stroke="#9b8b6a" stroke-width="7"><path d="m155 365 13 58M179 360l9 67M204 355l4 76M230 355v78M256 355l-4 76M281 360l-9 67M305 365l-13 58"/></g>
+<g fill="none" stroke="#453c30" stroke-width="3"><path d="m217 48 15 69-18 29 17 46-11 43M92 163l27 7-8 19M371 291l-39 32 8 24-27 14M182 480l16-36M284 474l-15-34M303 81l-13 38 18 29"/><path d="M81 283q40 12 72 1M379 283q-40 12-72 1"/></g>
+<g stroke="#b6a68b" stroke-width="3"><path d="m212 85 28-5M218 105l25-4M211 142l25-11M215 165l25-7M215 184l26-5"/></g>
+<g fill="#6d0f0e"><path d="m143 81 20 46-9 53-18-60ZM305 91l-17 64 17 27 7-70Z"/><path d="m110 264 14 45-5 44-13-27ZM338 264l-14 45 5 44 13-27Z"/></g>
+<g fill="#847a68" stroke="#25231f" stroke-width="3"><circle cx="81" cy="219" r="7"/><circle cx="379" cy="219" r="7"/><circle cx="94" cy="366" r="7"/><circle cx="366" cy="366" r="7"/><circle cx="230" cy="66" r="6"/></g>
+</svg>
