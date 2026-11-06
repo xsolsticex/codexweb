@@ -1,4 +1,5 @@
-import json, os, sqlite3, secrets, hashlib, hmac, time
+import json, os, sqlite3, secrets, hashlib, hmac, time, base64, io, re, warnings
+from PIL import Image, UnidentifiedImageError
 from pathlib import Path
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from http.cookies import SimpleCookie
@@ -8,6 +9,30 @@ DATA = Path(os.environ.get('DATA_DIR', ROOT / '.data'))
 DATA.mkdir(parents=True, exist_ok=True)
 DB = DATA / 'shop.db'
 SESSIONS = {}
+MAX_IMAGE_BYTES = 4 * 1024 * 1024
+
+def product_image(data):
+    if not isinstance(data, str): raise ValueError('Imagen no válida')
+    try:
+        raw = base64.b64decode(data, validate=True)
+        if len(raw) > MAX_IMAGE_BYTES: raise ValueError('Imagen demasiado grande')
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', Image.DecompressionBombWarning)
+            with Image.open(io.BytesIO(raw)) as image:
+                if image.format not in ('JPEG', 'PNG', 'WEBP') or image.width * image.height > 16000000:
+                    raise ValueError('Formato o tamaño de imagen no válido')
+                image.load()
+                image = image.convert('RGBA')
+                image.thumbnail((1600, 1600))
+                output = io.BytesIO()
+                image.save(output, format='WEBP', quality=85)
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError, Image.DecompressionBombWarning) as error:
+        raise ValueError('Imagen no válida') from error
+    uploads = DATA / 'uploads'
+    uploads.mkdir(exist_ok=True)
+    name = secrets.token_hex(16) + '.webp'
+    (uploads / name).write_bytes(output.getvalue())
+    return '/uploads/' + name
 
 def connect():
     c = sqlite3.connect(DB)
@@ -19,6 +44,8 @@ def initialize():
         c.executescript('''CREATE TABLE IF NOT EXISTS products(id INTEGER PRIMARY KEY, name TEXT NOT NULL, brewery TEXT NOT NULL, style TEXT NOT NULL, price INTEGER NOT NULL, stock INTEGER NOT NULL, abv REAL NOT NULL, volume INTEGER NOT NULL, description TEXT NOT NULL, color TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS orders(id TEXT PRIMARY KEY, created INTEGER, customer TEXT, items TEXT, total INTEGER, status TEXT);
         CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT);''')
+        if 'image' not in [r['name'] for r in c.execute('PRAGMA table_info(products)')]:
+            c.execute("ALTER TABLE products ADD COLUMN image TEXT NOT NULL DEFAULT ''")
         if not c.execute("SELECT 1 FROM settings WHERE key='seeded'").fetchone():
             beers = [('Bruma Atlántica','Costa Norte','IPA',395,48,6.2,330,'Cítrica, aromática y con un final fresco. Lúpulos que saben a escapada al norte.','#d79b36'),('Trigo de Sol','La Huerta','Weissbier',320,32,5.1,500,'Trigo suave, notas de plátano y un toque de clavo. El sol, en una botella.','#edbd61'),('Medianoche','Malta Negra','Stout',450,24,7.0,330,'Malta tostada, cacao y café. Una cerveza para disfrutar sin mirar el reloj.','#47302a'),('La de Siempre','Sierra Clara','Lager',280,60,4.8,330,'Dorada, ligera y honesta. Tu nueva favorita para las pequeñas celebraciones.','#d9ae4c'),('Bosque Adentro','Lúpulo Salvaje','Pale Ale',375,36,5.5,330,'Pino, fruta de hueso y el equilibrio perfecto entre malta y lúpulo.','#b76c36'),('Roja de Otoño','Tierra Roja','Amber Ale',390,18,5.8,330,'Caramelo, pan recién hecho y un bonito color cobrizo. Puro confort.','#a54c2e')]
             c.executemany('INSERT INTO products(name,brewery,style,price,stock,abv,volume,description,color) VALUES(?,?,?,?,?,?,?,?,?)', beers)
@@ -31,7 +58,7 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_response(status); self.send_header('Content-Type','application/json; charset=utf-8'); self.send_header('Cache-Control','no-store'); self.end_headers(); self.wfile.write(raw)
     def body(self):
         size=int(self.headers.get('Content-Length','0'))
-        if size>100000: raise ValueError('Solicitud demasiado grande')
+        if size<0 or size>6*1024*1024: raise ValueError('Solicitud demasiado grande')
         return json.loads(self.rfile.read(size))
     def admin(self):
         cookie=SimpleCookie(self.headers.get('Cookie',''))
@@ -39,6 +66,18 @@ class Handler(SimpleHTTPRequestHandler):
         return token and SESSIONS.get(token.value,0)>time.time()
     def do_GET(self):
         route=self.path.split('?')[0]
+        if route.startswith('/uploads/'):
+            if not re.fullmatch(r'/uploads/[a-f0-9]{32}\.webp', route): return self.send_error(404)
+            path = DATA / 'uploads' / route.rsplit('/',1)[-1]
+            if not path.is_file(): return self.send_error(404)
+            raw = path.read_bytes()
+            self.send_response(200)
+            self.send_header('Content-Type','image/webp')
+            self.send_header('X-Content-Type-Options','nosniff')
+            self.send_header('Content-Length',str(len(raw)))
+            self.end_headers()
+            self.wfile.write(raw)
+            return
         if route=='/api/products':
             with connect() as c: products=[dict(r) for r in c.execute('SELECT * FROM products ORDER BY id')]
             return self.send_json(200,products)
@@ -104,6 +143,12 @@ class Handler(SimpleHTTPRequestHandler):
                             if type(d.get(k))!=int or d[k]<0 or d[k]>1000000: raise ValueError('Precio, stock o volumen no válido')
                         if d['price']==0 or d['volume']==0 or not 0<=float(d.get('abv',-1))<=30: raise ValueError('Revisa precio, volumen y graduación')
                         keys=['name','brewery','style','price','stock','abv','volume','description','color']; values=[d[k] for k in keys]
+                        if 'image_data' in d or 'image' in d:
+                            image = d.get('image', '')
+                            if not isinstance(image,str) or (image and (not re.fullmatch(r'/uploads/[a-f0-9]{32}\.webp',image) or not (DATA / 'uploads' / image.rsplit('/',1)[-1]).is_file())):
+                                raise ValueError('Imagen no válida')
+                            if d.get('image_data'): image = product_image(d['image_data'])
+                            keys.append('image'); values.append(image)
                         if pid:
                             if not c.execute('UPDATE products SET '+','.join(k+'=?' for k in keys)+' WHERE id=?',values+[pid]).rowcount: return self.send_json(404,{'error':'Producto no encontrado'})
                         else: c.execute('INSERT INTO products('+','.join(keys)+') VALUES('+','.join('?' for _ in keys)+')',values)
