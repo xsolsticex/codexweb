@@ -1,5 +1,6 @@
 import json, os, sqlite3, secrets, hashlib, hmac, time, base64, io, re, warnings
 from PIL import Image, UnidentifiedImageError
+from catalog_import import import_once
 from pathlib import Path
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from http.cookies import SimpleCookie
@@ -8,11 +9,11 @@ ROOT = Path(__file__).parent
 DATA = Path(os.environ.get('DATA_DIR', ROOT / '.data'))
 DATA.mkdir(parents=True, exist_ok=True)
 DB = DATA / 'shop.db'
+CATALOG_PATH = ROOT / 'static' / 'beers.json'
 SESSIONS = {}
 MAX_IMAGE_BYTES = 4 * 1024 * 1024
 
 
-os.environ["ADMIN_PASSWORD"] = ""
 
 def product_image(data):
     if not isinstance(data, str): raise ValueError('Imagen no válida')
@@ -49,10 +50,13 @@ def initialize():
         CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT);''')
         if 'image' not in [r['name'] for r in c.execute('PRAGMA table_info(products)')]:
             c.execute("ALTER TABLE products ADD COLUMN image TEXT NOT NULL DEFAULT ''")
+        if 'abv_label' not in [r['name'] for r in c.execute('PRAGMA table_info(products)')]:
+            c.execute("ALTER TABLE products ADD COLUMN abv_label TEXT NOT NULL DEFAULT ''")
         if not c.execute("SELECT 1 FROM settings WHERE key='seeded'").fetchone():
             beers = [('Bruma Atlántica','Costa Norte','IPA',395,48,6.2,330,'Cítrica, aromática y con un final fresco. Lúpulos que saben a escapada al norte.','#d79b36'),('Trigo de Sol','La Huerta','Weissbier',320,32,5.1,500,'Trigo suave, notas de plátano y un toque de clavo. El sol, en una botella.','#edbd61'),('Medianoche','Malta Negra','Stout',450,24,7.0,330,'Malta tostada, cacao y café. Una cerveza para disfrutar sin mirar el reloj.','#47302a'),('La de Siempre','Sierra Clara','Lager',280,60,4.8,330,'Dorada, ligera y honesta. Tu nueva favorita para las pequeñas celebraciones.','#d9ae4c'),('Bosque Adentro','Lúpulo Salvaje','Pale Ale',375,36,5.5,330,'Pino, fruta de hueso y el equilibrio perfecto entre malta y lúpulo.','#b76c36'),('Roja de Otoño','Tierra Roja','Amber Ale',390,18,5.8,330,'Caramelo, pan recién hecho y un bonito color cobrizo. Puro confort.','#a54c2e')]
             c.executemany('INSERT INTO products(name,brewery,style,price,stock,abv,volume,description,color) VALUES(?,?,?,?,?,?,?,?,?)', beers)
             c.execute("INSERT INTO settings VALUES('seeded','1')")
+        import_once(c, CATALOG_PATH)
 
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self,*a,**kw): super().__init__(*a,directory=str(ROOT / 'static'),**kw)
@@ -144,8 +148,11 @@ class Handler(SimpleHTTPRequestHandler):
                             if not isinstance(d.get(k),str) or not d[k].strip() or len(d[k])>2000: raise ValueError('Revisa los campos del producto')
                         for k in ['price','stock','volume']:
                             if type(d.get(k))!=int or d[k]<0 or d[k]>1000000: raise ValueError('Precio, stock o volumen no válido')
-                        if d['price']==0 or d['volume']==0 or not 0<=float(d.get('abv',-1))<=30: raise ValueError('Revisa precio, volumen y graduación')
+                        if d['price']==0 or (d['stock']>0 and d['volume']==0) or not 0<=float(d.get('abv',-1))<=30: raise ValueError('Revisa precio, volumen y graduación')
                         keys=['name','brewery','style','price','stock','abv','volume','description','color']; values=[d[k] for k in keys]
+                        if 'abv_label' in d:
+                            if not isinstance(d['abv_label'],str) or len(d['abv_label'])>60: raise ValueError('Graduación no válida')
+                            keys.append('abv_label'); values.append(d['abv_label'])
                         if 'image_data' in d or 'image' in d:
                             image = d.get('image', '')
                             if not isinstance(image,str) or (image and (not re.fullmatch(r'/uploads/[a-f0-9]{32}\.webp',image) or not (DATA / 'uploads' / image.rsplit('/',1)[-1]).is_file())):

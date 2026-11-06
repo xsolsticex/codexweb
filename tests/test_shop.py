@@ -5,6 +5,7 @@ import server
 class ShopTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        server.CATALOG_PATH=Path('/nonexistent/test-catalog.json')
         cls.tmp=tempfile.TemporaryDirectory();server.DATA=Path(cls.tmp.name);server.DB=server.DATA/'test.db';server.initialize()
         os.environ['ADMIN_PASSWORD']='test-only-password'
         cls.http=server.ThreadingHTTPServer(('127.0.0.1',0),server.Handler)
