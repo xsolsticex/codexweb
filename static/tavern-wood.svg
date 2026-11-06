@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="480" viewBox="0 0 720 480">
+<defs>
+ <filter id="grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".008 .22" numOctaves="3" seed="12" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="gamma" amplitude="1" exponent="1.8" offset="0"/><feFuncG type="gamma" amplitude=".65" exponent="1.8" offset="0"/><feFuncB type="gamma" amplitude=".35" exponent="1.8" offset="0"/><feFuncA type="linear" slope=".32"/></feComponentTransfer/><feBlend in="SourceGraphic" mode="soft-light"/></filter>
+ <linearGradient id="oak" x2="0" y2="1"><stop stop-color="#533620"/><stop offset=".45" stop-color="#3a261a"/><stop offset=".85" stop-color="#4b301e"/><stop offset="1" stop-color="#2a1b13"/></linearGradient>
+ <pattern id="boards" width="720" height="120" patternUnits="userSpaceOnUse"><path fill="url(#oak)" d="M0 0h720v120H0z"/><path d="M0 1h720" stroke="#a47b4c" stroke-opacity=".27"/><path d="M0 117h720" stroke="#130e0a" stroke-width="4"/><path d="M210 0v118" stroke="#21160f" stroke-width="2"/><path d="M212 0v118" stroke="#a47b4c" stroke-opacity=".12"/></pattern>
+</defs>
+<path fill="url(#boards)" filter="url(#grain)" d="M0 0h720v480H0z"/>
+<g fill="none" stroke="#bb8a54" stroke-opacity=".12">
+<path d="M0 29c110-12 125 17 207 8M216 34c120-15 272 12 504-3M0 75c105 6 115-12 207-8M215 80c212-25 284 17 505-6M0 170c150-21 174 20 207 3M215 156c128 22 290-14 505 6M0 211c98-5 133 13 207 6M215 206c260-16 288 17 505-3M0 274c108 17 148-5 207 5M215 288c157-22 316 13 505-10M0 330c109-11 133 12 207-2M215 320c207-15 311 10 505-4M0 393c83-13 140 7 207-6M215 410c179-25 280 10 505-8M0 454c135 13 137-15 207-6M215 451c121-15 276 17 505-7"/>
+<ellipse cx="523" cy="185" rx="54" ry="10"/><ellipse cx="523" cy="185" rx="35" ry="6"/><ellipse cx="523" cy="185" rx="15" ry="3"/><ellipse cx="104" cy="310" rx="47" ry="8"/><ellipse cx="104" cy="310" rx="25" ry="4"/>
+</g>
+<g fill="#140e09" opacity=".7"><circle cx="199" cy="12" r="2"/><circle cx="224" cy="105" r="2"/><circle cx="199" cy="252" r="2"/><circle cx="224" cy="345" r="2"/><circle cx="705" cy="132" r="2"/><circle cx="705" cy="465" r="2"/></g>
+</svg>
