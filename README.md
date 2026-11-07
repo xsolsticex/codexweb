@@ -57,7 +57,7 @@ En administración, «Cancelar y eliminar pedido» elimina definitivamente un pe
 
 Cada pedido nuevo guarda, en la misma transacción que reserva el stock, un correo pendiente en SQLite. El servidor lo envía en segundo plano usando SMTP con TLS. Incluye referencia, fecha de Madrid, productos, unidades, precios, subtotal, envío, total y dirección de entrega. Aclara que el pedido está pendiente de pago y permite responder al remitente para gestionar la compra. Incluye versiones HTML y texto.
 
-Configura estas variables en el entorno del servidor antes de iniciarlo, usando los datos de tu proveedor de correo:
+Configura estas variables en el archivo `.env` de la raíz del proyecto o en el entorno del servidor, usando los datos de tu proveedor de correo:
 
 - `SMTP_HOST`: servidor SMTP.
 - `SMTP_PORT`: 587 para STARTTLS (predeterminado) o 465 para SSL.
@@ -78,4 +78,15 @@ Los fallos de envío se reintentan automáticamente con espera progresiva de 30 
 4. Configura `MAIL_FROM` con esa misma dirección (`The Beer Codex <tu-cuenta@gmail.com>`) y `MAIL_REPLY_TO` con el correo donde atenderás las consultas.
 5. Reinicia el servidor y realiza un pedido de prueba con una dirección tuya. Comprueba su recepción y el estado del correo en administración. Gmail aplica sus límites de envío y puede filtrar mensajes como spam.
 
-No hace falta instalar paquetes adicionales para enviar correos: se utiliza la biblioteca estándar de Python.
+El envío SMTP utiliza la biblioteca estándar de Python. `python-dotenv`, incluido en `requirements.txt`, permite cargar la configuración local.
+
+### Archivo local de configuración
+
+El servidor carga automáticamente `.env` desde la raíz del proyecto, independientemente del directorio de ejecución. Las variables definidas en el entorno del alojamiento tienen prioridad. Para preparar una instalación nueva:
+
+```sh
+python3 -m pip install -r requirements.txt
+cp .env.example .env
+```
+
+Completa `.env` con tu cuenta Gmail y su contraseña de aplicación y reinicia el servidor. `MAIL_REPLY_TO` se puede omitir para usar la dirección remitente; si se configura, debe ser un correo válido. `.env` y sus variantes locales están excluidos en `.gitignore`; `.env.example` es una plantilla pública sin credenciales que sí se versiona. Nunca añadas datos reales a la plantilla ni fuerces la inclusión de `.env` con `git add -f`.

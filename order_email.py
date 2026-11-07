@@ -56,7 +56,7 @@ def receipt(order):
     message["Subject"] = f"Tu pedido {order['id']} · The Beer Codex"
     message["Date"] = formatdate(order["created"], localtime=False)
     message["Message-ID"] = f"<order-{order['id']}@{sender_address.split('@')[1]}>"
-    reply_to = os.environ.get("MAIL_REPLY_TO", sender_address)
+    reply_to = os.environ.get("MAIL_REPLY_TO") or sender_address
     if not valid_email(reply_to):
         raise ValueError("MAIL_REPLY_TO no válido")
     message["Reply-To"] = reply_to

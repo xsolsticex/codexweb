@@ -1,5 +1,6 @@
 import json, os, sqlite3, secrets, hashlib, hmac, time, base64, io, re, warnings
 from PIL import Image, UnidentifiedImageError
+from dotenv import load_dotenv
 from chat import SCHEMA as CHAT_SCHEMA, handle as handle_chat
 from order_email import (
     SCHEMA as EMAIL_SCHEMA,
@@ -14,6 +15,7 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from http.cookies import SimpleCookie
 
 ROOT = Path(__file__).parent
+load_dotenv(ROOT / ".env", override=False, interpolate=False)
 DATA = Path(os.environ.get("DATA_DIR", ROOT / ".data"))
 DATA.mkdir(parents=True, exist_ok=True)
 DB = DATA / "shop.db"
