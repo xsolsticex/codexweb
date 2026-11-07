@@ -50,6 +50,18 @@ class ShopTest(unittest.TestCase):
         self.assertEqual(self.request('/api/chat','POST',{'action':'close'},customer)[0],200)
         self.assertTrue(self.request('/api/chat',client=customer)[1]['closed'])
         self.assertEqual(len(self.request('/api/admin/chats/'+cid,client=admin)[1]['messages']),2)
+        self.assertEqual(self.request('/api/admin/chats/'+cid,'DELETE')[0],401)
+        # Open conversations are protected against deletion.
+        self.request('/api/chat','POST',{'action':'new'},customer)
+        self.request('/api/chat','POST',{'text':'Consulta abierta'},customer)
+        listing=self.request('/api/admin/chats',client=admin)[1]
+        open_id=next(row['id'] for row in listing if not row['closed'])
+        self.assertEqual(self.request('/api/admin/chats/'+open_id,'DELETE',client=admin)[0],409)
+        self.assertEqual(self.request('/api/admin/chats/'+cid,'DELETE',client=admin)[0],200)
+        self.assertEqual(self.request('/api/admin/chats/'+cid,client=admin)[0],404)
+        with server.connect() as c:
+            self.assertEqual(c.execute('SELECT count(*) FROM chat_messages WHERE conversation=?',(cid,)).fetchone()[0],0)
+
 
 
     def test_store_serves(self):

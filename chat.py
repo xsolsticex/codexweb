@@ -29,6 +29,17 @@ def handle(handler, route, connect):
         exists = cid and c.execute('SELECT closed FROM conversations WHERE id=?', (cid,)).fetchone()
         if admin_route and not exists:
             return handler.send_json(404, {'error': 'Conversación no encontrada'})
+        if handler.command == 'DELETE':
+            if not admin_route:
+                return handler.send_json(405, {'error': 'Método no permitido'})
+            c.execute('BEGIN IMMEDIATE')
+            current = c.execute('SELECT closed FROM conversations WHERE id=?', (cid,)).fetchone()
+            if not current or not current['closed']:
+                return handler.send_json(409, {'error': 'Solo se pueden eliminar conversaciones finalizadas.'})
+            c.execute('DELETE FROM chat_messages WHERE conversation=?', (cid,))
+            c.execute('DELETE FROM conversations WHERE id=?', (cid,))
+            c.commit()
+            return handler.send_json(200, {'ok': True})
         if handler.command == 'GET':
             rows = c.execute('SELECT id,sender,text,created FROM chat_messages WHERE conversation=? ORDER BY id DESC LIMIT 200', (cid,))
             return handler.send_json(200, {'messages': list(reversed([dict(r) for r in rows])), 'closed': bool(exists and exists['closed'])})
