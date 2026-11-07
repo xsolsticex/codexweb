@@ -1,7 +1,7 @@
 [
   {
     "name": "La Chouffe (Bélgica, Achouffe)",
-    "image": "/product-images/official-chouffe.png",
+    "image": "/images/products/official-chouffe.png",
     "source_page": "https://chouffe.com/en-us/",
     "source_image": "https://chouffe.com/uploads/Beers/La-Chouffe/La_Chouffe_Blond_Bottle_EU_33cl_DRY.png",
     "credit": "Brasserie d’Achouffe",
@@ -14,7 +14,7 @@
   },
   {
     "name": "Delirium Tremens (Bélgica, Flandes Oriental)",
-    "image": "/product-images/official-delirium.png",
+    "image": "/images/products/official-delirium.png",
     "source_page": "https://www.delirium.be/en/beers/delirium-tremens",
     "source_image": "https://www.delirium.be/themes/custom/delirium/assets/img/beers/beer_delirium_tremens_bottle.png?v=1",
     "credit": "Brouwerij Huyghe",
@@ -27,7 +27,7 @@
   },
   {
     "name": "Sapporo (Japón, Hokkaidō)",
-    "image": "/product-images/0087975003502.jpg",
+    "image": "/images/products/0087975003502.jpg",
     "source_page": "https://world.openfoodfacts.org/product/0087975003502",
     "source_image": "https://images.openfoodfacts.org/images/products/008/797/500/3502/front_en.7.400.jpg",
     "credit": "waistline-app / Open Food Facts",
@@ -40,7 +40,7 @@
   },
   {
     "name": "Pacifico (México, Mazatlán)",
-    "image": "/product-images/75031596.jpg",
+    "image": "/images/products/75031596.jpg",
     "source_page": "https://world.openfoodfacts.org/product/75031596",
     "source_image": "https://images.openfoodfacts.org/images/products/000/007/503/1596/front_en.7.400.jpg",
     "credit": "tacinte / Open Food Facts",
@@ -53,7 +53,7 @@
   },
   {
     "name": "Singha (Tailandia, Bangkok)",
-    "image": "/product-images/8850999113005.jpg",
+    "image": "/images/products/8850999113005.jpg",
     "source_page": "https://world.openfoodfacts.org/product/8850999113005",
     "source_image": "https://images.openfoodfacts.org/images/products/885/099/911/3005/front_en.36.400.jpg",
     "credit": "openfoodfacts-contributors / Open Food Facts",
@@ -66,7 +66,7 @@
   },
   {
     "name": "Cooper's Sparkling Ale",
-    "image": "/product-images/93302074.jpg",
+    "image": "/images/products/93302074.jpg",
     "source_page": "https://world.openfoodfacts.org/product/93302074",
     "source_image": "https://images.openfoodfacts.org/images/products/000/009/330/2074/front_en.9.400.jpg",
     "credit": "daryl / Open Food Facts",
@@ -79,7 +79,7 @@
   },
   {
     "name": "Ichnusa (Italia, Cerdeña)",
-    "image": "/product-images/8006890690163.jpg",
+    "image": "/images/products/8006890690163.jpg",
     "source_page": "https://world.openfoodfacts.org/product/8006890690163",
     "source_image": "https://images.openfoodfacts.org/images/products/800/689/069/0163/front_it.5.400.jpg",
     "credit": "telperion87 / Open Food Facts",
@@ -92,7 +92,7 @@
   },
   {
     "name": "Schlosser Alt (Alemania, Düsseldorf)",
-    "image": "/product-images/4004201003040.jpg",
+    "image": "/images/products/4004201003040.jpg",
     "source_page": "https://world.openfoodfacts.org/product/4004201003040",
     "source_image": "https://images.openfoodfacts.org/images/products/400/420/100/3040/front_de.5.400.jpg",
     "credit": "itatest / Open Food Facts",
@@ -105,7 +105,7 @@
   },
   {
     "name": "Orval (Bélgica, Valonia)",
-    "image": "/product-images/11223637.jpg",
+    "image": "/images/products/11223637.jpg",
     "source_page": "https://world.openfoodfacts.org/product/11223637",
     "source_image": "https://images.openfoodfacts.org/images/products/000/001/122/3637/front_fr.3.400.jpg",
     "credit": "openfoodfacts-contributors / Open Food Facts",
@@ -118,7 +118,7 @@
   },
   {
     "name": "Tripel Karmeliet (Bélgica, Flandes)",
-    "image": "/product-images/5410228256502.jpg",
+    "image": "/images/products/5410228256502.jpg",
     "source_page": "https://world.openfoodfacts.org/product/5410228256502",
     "source_image": "https://images.openfoodfacts.org/images/products/541/022/825/6502/front_fr.3.400.jpg",
     "credit": "kiliweb / Open Food Facts",
@@ -131,7 +131,7 @@
   },
   {
     "name": "Traquair Jacobite (Escocia, Scottish Borders)",
-    "image": "/product-images/5019025161158.jpg",
+    "image": "/images/products/5019025161158.jpg",
     "source_page": "https://world.openfoodfacts.org/product/5019025161158",
     "source_image": "https://images.openfoodfacts.org/images/products/501/902/516/1158/front_en.11.400.jpg",
     "credit": "sebleouf / Open Food Facts",
@@ -144,7 +144,7 @@
   },
   {
     "name": "Weihenstephaner Hefe Weissbier (Alemania, Baviera)",
-    "image": "/product-images/4105120573949.jpg",
+    "image": "/images/products/4105120573949.jpg",
     "source_page": "https://world.openfoodfacts.org/product/4105120573949",
     "source_image": "https://images.openfoodfacts.org/images/products/410/512/057/3949/front_en.6.400.jpg",
     "credit": "Open Food Facts",
@@ -157,7 +157,7 @@
   },
   {
     "name": "Menduiña María Soliña (España, Galicia)",
-    "image": "/product-images/8437014089097.jpg",
+    "image": "/images/products/8437014089097.jpg",
     "source_page": "https://world.openfoodfacts.org/product/8437014089097",
     "source_image": "https://images.openfoodfacts.org/images/products/843/701/408/9097/front_es.3.400.jpg",
     "credit": "foodless / Open Food Facts",
@@ -170,7 +170,7 @@
   },
   {
     "name": "Maredsous 8 Brune (Bélgica, Valonia)",
-    "image": "/product-images/5411681037059.jpg",
+    "image": "/images/products/5411681037059.jpg",
     "source_page": "https://world.openfoodfacts.org/product/5411681037059",
     "source_image": "https://images.openfoodfacts.org/images/products/541/168/103/7059/front_fr.3.400.jpg",
     "credit": "kiliweb / Open Food Facts",
@@ -183,7 +183,7 @@
   },
   {
     "name": "St. Bernardus ABT 12 (Bélgica, Flandes)",
-    "image": "/product-images/0699176483313.jpg",
+    "image": "/images/products/0699176483313.jpg",
     "source_page": "https://world.openfoodfacts.org/product/0699176483313",
     "source_image": "https://images.openfoodfacts.org/images/products/069/917/648/3313/front_en.15.400.jpg",
     "credit": "Open Food Facts",
@@ -196,7 +196,7 @@
   },
   {
     "name": "Chimay Grande Reserve (75cl) (Bélgica, Valonia)",
-    "image": "/product-images/5410908500031.jpg",
+    "image": "/images/products/5410908500031.jpg",
     "source_page": "https://world.openfoodfacts.org/product/5410908500031",
     "source_image": "https://images.openfoodfacts.org/images/products/541/090/850/0031/front_fr.3.400.jpg",
     "credit": "Open Food Facts",
@@ -209,7 +209,7 @@
   },
   {
     "name": "Gouden Carolus Ambrio (Bélgica, Malinas)",
-    "image": "/product-images/5425006240055.jpg",
+    "image": "/images/products/5425006240055.jpg",
     "source_page": "https://world.openfoodfacts.org/product/5425006240055",
     "source_image": "https://images.openfoodfacts.org/images/products/542/500/624/0055/front_fr.7.400.jpg",
     "credit": "Open Food Facts",
@@ -222,7 +222,7 @@
   },
   {
     "name": "Kasteel Barista (Bélgica, Flandes)",
-    "image": "/product-images/5411081005696.jpg",
+    "image": "/images/products/5411081005696.jpg",
     "source_page": "https://world.openfoodfacts.org/product/5411081005696",
     "source_image": "https://images.openfoodfacts.org/images/products/541/108/100/5696/front_en.8.400.jpg",
     "credit": "Open Food Facts",
@@ -235,7 +235,7 @@
   },
   {
     "name": "Maredsous 10 (Bélgica, Valonia)",
-    "image": "/product-images/5411186038001.jpg",
+    "image": "/images/products/5411186038001.jpg",
     "source_page": "https://world.openfoodfacts.org/product/5411186038001",
     "source_image": "https://images.openfoodfacts.org/images/products/541/118/603/8001/front_fr.4.400.jpg",
     "credit": "Open Food Facts",

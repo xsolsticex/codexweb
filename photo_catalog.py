@@ -5,16 +5,20 @@ import re
 from pathlib import Path
 
 STATIC = Path(__file__).parent / 'static'
-MANIFEST = STATIC / 'product-images.json'
+MANIFEST = STATIC / 'data' / 'product-images.json'
 
 def photos():
     return json.loads(MANIFEST.read_text(encoding='utf-8')) if MANIFEST.is_file() else []
 
 def catalog_image_exists(url):
-    return isinstance(url, str) and bool(re.fullmatch(r'/product-images/[a-z0-9-]+\.(?:png|jpg|webp)',url)) and (STATIC / url.lstrip('/')).is_file()
+    return isinstance(url, str) and bool(re.fullmatch(r'/images/products/[a-z0-9-]+\.(?:png|jpg|webp)',url)) and (STATIC / url.lstrip('/')).is_file()
 
 def apply_photos(connection):
     applied = 0
+    # Migrate only bundled photo paths; retain administrator uploads and removals.
+    for photo in photos():
+        legacy = photo['image'].replace('/images/products/', '/product-images/', 1)
+        connection.execute('UPDATE products SET image=? WHERE image=?', (photo['image'], legacy))
     for photo in photos():
         key = 'catalog-photo:' + hashlib.sha256(photo['name'].encode()).hexdigest()
         if connection.execute('SELECT 1 FROM settings WHERE key=?',(key,)).fetchone():

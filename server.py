@@ -10,7 +10,7 @@ ROOT = Path(__file__).parent
 DATA = Path(os.environ.get('DATA_DIR', ROOT / '.data'))
 DATA.mkdir(parents=True, exist_ok=True)
 DB = DATA / 'shop.db'
-CATALOG_PATH = ROOT / 'static' / 'beers.json'
+CATALOG_PATH = ROOT / 'static' / 'data' / 'beers.json'
 SESSIONS = {}
 MAX_IMAGE_BYTES = 4 * 1024 * 1024
 
@@ -96,7 +96,7 @@ class Handler(SimpleHTTPRequestHandler):
             with connect() as c: rows=[dict(r) for r in c.execute('SELECT * FROM orders ORDER BY created DESC')]
             return self.send_json(200,rows)
         if route.startswith('/api/'): return self.send_json(404,{'error':'No encontrado'})
-        if route=='/admin': self.path='/index.html'
+        if route in ('/', '/admin', '/index.html'): self.path='/html/index.html'
         return super().do_GET()
     def do_POST(self): self.mutate()
     def do_PUT(self): self.mutate()

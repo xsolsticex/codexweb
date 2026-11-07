@@ -1,8 +1,8 @@
 # Fotos del catálogo
 
-19 imágenes verificadas por etiqueta: 2 del fabricante y 17 de Open Food Facts. Los originales se conservan sin retoques en `static/product-images/`. La resolución y la calidad varían según la fuente; varias fotos son primeros planos de la etiqueta. Las fotografías son orientativas mientras el formato no esté confirmado.
+19 imágenes verificadas por etiqueta: 2 del fabricante y 17 de Open Food Facts. Los originales se conservan sin retoques en `static/images/products/`. La resolución y la calidad varían según la fuente; varias fotos son primeros planos de la etiqueta. Las fotografías son orientativas mientras el formato no esté confirmado.
 
-El registro `static/product-images.json` incluye nombre exacto, URL de origen, autor cuando está disponible, licencia y SHA-256. Las fotos de Open Food Facts llevan atribución visible y enlace a CC BY-SA 3.0. Las dos imágenes oficiales se identifican con el fabricante como titular; no se afirma que tengan una licencia abierta.
+El registro `static/data/product-images.json` incluye nombre exacto, URL de origen, autor cuando está disponible, licencia y SHA-256. Las fotos de Open Food Facts llevan atribución visible y enlace a CC BY-SA 3.0. Las dos imágenes oficiales se identifican con el fabricante como titular; no se afirma que tengan una licencia abierta.
 
 ## Fuentes
 

@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from catalog_import import read_catalog, import_once
 
-SOURCE = Path(__file__).resolve().parents[1] / 'static' / 'beers.json'
+SOURCE = Path(__file__).resolve().parents[1] / 'static' / 'data' / 'beers.json'
 
 class CatalogImportTest(unittest.TestCase):
     def test_prices_ranges_and_known_volume(self):
