@@ -149,6 +149,18 @@ class Handler(SimpleHTTPRequestHandler):
                     c.execute('INSERT INTO orders VALUES(?,?,?,?,?,?)',(oid,int(time.time()),json.dumps(customer),json.dumps(lines),total,'pending_payment'))
                 return self.send_json(201,{'id':oid,'total':total,'status':'pending_payment'})
             if not self.admin(): return self.send_json(401,{'error':'Inicia sesión'})
+            if route.startswith('/api/orders/') and self.command == 'DELETE':
+                oid = route.removeprefix('/api/orders/')
+                with connect() as c:
+                    c.execute('BEGIN IMMEDIATE')
+                    order = c.execute('SELECT items,status FROM orders WHERE id=?', (oid,)).fetchone()
+                    if not order: return self.send_json(404, {'error': 'Pedido no encontrado'})
+                    if order['status'] != 'pending_payment':
+                        return self.send_json(409, {'error': 'Solo se pueden eliminar pedidos pendientes de pago.'})
+                    for item in json.loads(order['items']):
+                        c.execute('UPDATE products SET stock=stock+? WHERE id=?', (item['quantity'], item['id']))
+                    c.execute('DELETE FROM orders WHERE id=?', (oid,))
+                return self.send_json(200, {'ok': True})
             if route.startswith('/api/products'):
                 pid=int(route.rsplit('/',1)[-1]) if route!='/api/products' else None
                 with connect() as c:

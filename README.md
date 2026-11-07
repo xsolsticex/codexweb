@@ -50,3 +50,5 @@ El botón inferior derecho abre una conversación con el administrador. Los mens
 El cliente y el administrador pueden finalizar una conversación. Las conversaciones finalizadas conservan su historial y no admiten nuevos mensajes; el cliente puede pulsar «Nueva consulta» para comenzar otra. La bandeja de administración distingue las consultas finalizadas de las pendientes.
 
 El administrador puede eliminar definitivamente un chat finalizado y sus mensajes desde la conversación, previa confirmación. Las conversaciones abiertas no se pueden eliminar.
+
+En administración, «Cancelar y eliminar pedido» elimina definitivamente un pedido pendiente de pago tras confirmar y devuelve sus cantidades al stock de los productos que sigan existiendo. La operación es atómica y no admite pedidos con otro estado. No realiza reembolsos ni envía avisos al cliente.

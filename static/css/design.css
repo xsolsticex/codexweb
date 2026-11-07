@@ -48,3 +48,5 @@ footer:before{background:#090909;top:-55px;height:56px;-webkit-mask-position:-41
 .hero-photo{inset:18px 22px 28px 12px;width:calc(100% - 34px);height:calc(100% - 46px);object-fit:contain;object-position:center;-webkit-mask-image:none;mask-image:none;transform:rotate(2deg);filter:drop-shadow(8px 12px 8px #000b)}
 @media(max-width:800px){.hero-photo{inset:20px 18px 25px 8px;width:calc(100% - 26px);height:calc(100% - 45px);object-position:center}}
 @media(max-width:520px){.hero-photo{inset:16px 30px 20px 8px;width:calc(100% - 38px);height:calc(100% - 36px);object-position:center;-webkit-mask-image:none;mask-image:none;transform:rotate(2deg)}}
+
+.cancel-order{margin-top:18px;border-color:#a83232;color:#edaaa0;font-size:11px}.cancel-order:hover{background:#6d2024;color:#fff0e5}

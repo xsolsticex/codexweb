@@ -79,6 +79,25 @@ class ShopTest(unittest.TestCase):
         self.assertEqual(self.request('/api/products/'+str(product['id']),'DELETE',client=self.client)[0],200)
         self.assertEqual(self.request('/api/logout','POST',client=self.client)[0],200)
         self.assertEqual(self.request('/api/orders',client=self.client)[0],401)
+    def test_cancel_pending_order_restores_stock_once_and_requires_admin(self):
+        admin=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+        self.request('/api/login','POST',{'password':'test-only-password'},admin)
+        p=self.request('/api/products')[1][0]
+        order={'adult':True,'customer':{'name':'Test','email':'test@example.com','address':'Test 1','postal':'28001','city':'Madrid'},'items':[{'id':p['id'],'quantity':2}]}
+        code,result=self.request('/api/orders','POST',order)
+        self.assertEqual(code,201)
+        path='/api/orders/'+result['id']
+        self.assertEqual(self.request(path,'DELETE')[0],401)
+        self.assertEqual(self.request(path,'DELETE',client=admin)[0],200)
+        self.assertEqual(self.request('/api/products')[1][0]['stock'],p['stock'])
+        self.assertEqual(self.request(path,'DELETE',client=admin)[0],404)
+        self.assertEqual(self.request('/api/products')[1][0]['stock'],p['stock'])
+        self.assertNotIn(result['id'],[o['id'] for o in self.request('/api/orders',client=admin)[1]])
+        _,paid=self.request('/api/orders','POST',order)
+        with server.connect() as c: c.execute("UPDATE orders SET status='paid' WHERE id=?",(paid['id'],))
+        self.assertEqual(self.request('/api/orders/'+paid['id'],'DELETE',client=admin)[0],409)
+        self.assertEqual(self.request('/api/products')[1][0]['stock'],p['stock']-2)
+
     def test_order_prices_stock_and_rollback(self):
         p=self.request('/api/products')[1][0]
         order={'adult':True,'customer':{'name':'Cliente','email':'cliente@example.com','address':'Calle Prueba 1','postal':'28001','city':'Madrid'},'items':[{'id':p['id'],'quantity':2,'price':1}],'total':1}
