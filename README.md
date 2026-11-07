@@ -38,3 +38,7 @@ La web solicita confirmación de mayoría de edad; no verifica identidad. El nom
 python3 -m unittest discover -s tests -v
 node --check static/app.js
 ```
+
+## Fotografías del catálogo
+
+Se incluyen 19 fotos verificadas con fuentes y créditos en [PRODUCT_PHOTOS.md](PRODUCT_PHOTOS.md). El servidor las asigna una sola vez a los productos con el mismo nombre y sin foto. Se conservan las fotos subidas por administración; reemplazar o quitar una foto no se deshace al reiniciar. Los archivos forman parte del repositorio, por lo que no se necesita acceso externo al servirlas. Las 21 entradas restantes mantienen la ilustración provisional.
