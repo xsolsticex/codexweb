@@ -1941,3 +1941,70 @@ footer:before {
     align-self: flex-start;
   }
 }
+
+/* Continuous sign movement; repeated text keeps the loop seamless. */
+.garage-strip {
+  display: block;
+  overflow: hidden;
+  padding-inline: 0;
+}
+.garage-track {
+  display: flex;
+  width: max-content;
+  animation: garage-marquee 24s linear infinite;
+}
+.garage-message {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-around;
+  gap: clamp(24px, 5vw, 80px);
+  min-width: 100vw;
+  padding-inline: clamp(16px, 3vw, 48px);
+  white-space: nowrap;
+}
+.garage-strip .garage-message span,
+.garage-strip .garage-message b {
+  display: block;
+  flex-shrink: 0;
+}
+.garage-strip:hover .garage-track,
+.garage-strip.is-paused .garage-track {
+  animation-play-state: paused;
+}
+.garage-pause {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  border: 1px solid #e8a29a;
+  background: #191010;
+  color: #f5dbcf;
+  padding: 7px 10px;
+  font:
+    bold 12px Arial,
+    sans-serif;
+  box-shadow: 0 0 12px #ca2025;
+}
+@keyframes garage-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .garage-track {
+    animation: none;
+    width: 100%;
+  }
+  .garage-message {
+    min-width: 0;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .garage-message[aria-hidden='true'],
+  .garage-pause {
+    display: none;
+  }
+}
