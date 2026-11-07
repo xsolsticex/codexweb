@@ -1,38 +1,389 @@
-const $=s=>document.querySelector(s), money=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(n/100), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let products=[], filter='Todas', cart={};
-try{const saved=JSON.parse(localStorage.getItem('codex-cart')||'{}');for(const [id,q] of Object.entries(saved)) if(/^\d+$/.test(id)&&Number.isInteger(q)&&q>0&&q<=99)cart[id]=q;}catch{}
-async function api(path,method='GET',data){const r=await fetch('/api/'+path,{method,headers:data?{'Content-Type':'application/json'}:{},body:data?JSON.stringify(data):undefined});const raw=await r.text();let result={};try{result=JSON.parse(raw)}catch{}if(!r.ok)throw Error(result.error||'No se pudo completar la operación');return result}
-let toastTimer;function toast(message){$('#toast').textContent=message;$('#toast').style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').style.display='none',3500)}
-function persist(){try{localStorage.setItem('codex-cart',JSON.stringify(cart))}catch{}renderCart()}
-async function load(){products=await api('products');render();renderCart()}
-function imageCredit(p){if(!p.image_source)return '';return `<div class="photo-credit"><a href="${esc(p.image_source)}" target="_blank" rel="noopener noreferrer">Foto: ${esc(p.image_credit)}</a>${p.image_license_url?` · <a href="${esc(p.image_license_url)}" target="_blank" rel="noopener noreferrer">${esc(p.image_license)}</a>`:''}</div>`}
-function render(){const styles=['Todas',...new Set(products.map(p=>p.style))];if(!styles.includes(filter))filter='Todas';$('#styles').innerHTML=styles.map(s=>`<button data-filter="${esc(s)}" class="${filter===s?'active':''}">${esc(s)}</button>`).join('');let list=products.filter(p=>(filter==='Todas'||p.style===filter)&&`${p.name} ${p.brewery} ${p.style}`.toLowerCase().includes($('#search').value.toLowerCase()));if($('#sort').value!=='default')list.sort((a,b)=>($('#sort').value==='asc'?1:-1)*(a.price-b.price));$('#products').innerHTML=list.map(p=>`<article><div class="product-image"><span class="badge">${esc(p.style.toUpperCase())}</span>${p.image?`<img class="beer-photo" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="can" style="--beer:${/^#[0-9a-f]{6}$/i.test(p.color)?p.color:'#b77c35'}"><div class="can-label"><small>THE BEER CODEX</small><b>${esc(p.name)}</b><span>${esc(p.style)}</span></div></div>`}</div>${imageCredit(p)}<div class="product-meta"><div><span class="brewery">${esc(p.brewery)}</span><h3>${esc(p.name)}</h3><span class="details">${esc(p.style)} · ${esc(p.abv_label||p.abv+'%')} vol. · ${p.volume?p.volume+' ml':'Formato por confirmar'}</span></div><span class="price">${money(p.price)}</span></div><p class="description">${esc(p.description)}</p><button class="add" data-add="${p.id}" ${p.stock===0?'disabled':''}>${p.stock?'Añadir al carrito':!p.volume?'Pendiente de completar':'Sin existencias'} <span>+</span></button></article>`).join('');$('#catalogStatus').textContent=list.length?`${list.length} cervezas para descubrir`:'No encontramos cervezas con esos filtros.'}
-function cartLines(){return Object.entries(cart).map(([id,q])=>({p:products.find(p=>p.id===+id),q})).filter(x=>x.p)}
-function totals(){let subtotal=cartLines().reduce((a,{p,q})=>a+p.price*q,0);return {subtotal,shipping:subtotal>=6000||!subtotal?0:490,total:subtotal+(subtotal>=6000||!subtotal?0:490)}}
-function renderCart(){const lines=cartLines();$('#count').textContent=lines.reduce((s,x)=>s+x.q,0);$('#cartItems').innerHTML=lines.length?lines.map(({p,q})=>`<div class="cart-row"><div><h3>${esc(p.name)}</h3><small>${money(p.price)} · ${p.stock} disponibles</small></div><button data-qty="${p.id}" data-delta="-1" aria-label="Quitar una ${esc(p.name)}">−</button><span>${q}</span><button data-qty="${p.id}" data-delta="1" aria-label="Añadir una ${esc(p.name)}">+</button><button data-remove="${p.id}" aria-label="Eliminar ${esc(p.name)}">✕</button></div>`).join(''):'<p>Tu próxima cerveza favorita te espera. Explora el catálogo para empezar.</p>';const t=totals();$('#cartSummary').innerHTML=lines.length?`<div class="summary-line"><span>Subtotal</span><span>${money(t.subtotal)}</span></div><div class="summary-line"><span>Envío en España</span><span>${t.shipping?money(t.shipping):'Gratis'}</span></div><div class="summary-line"><strong>Total</strong><strong>${money(t.total)}</strong></div>`:'';$('#checkoutButton').disabled=!lines.length}
-$('#styles').onclick=e=>{const b=e.target.closest('[data-filter]');if(b){filter=b.dataset.filter;render()}};
-$('#search').oninput=render;$('#sort').onchange=render;
-$('#products').onclick=e=>{const b=e.target.closest('[data-add]');if(!b)return;const p=products.find(p=>p.id===+b.dataset.add);if((cart[p.id]||0)>=Math.min(p.stock,99))return toast('Has alcanzado el stock disponible');cart[p.id]=(cart[p.id]||0)+1;persist();toast(`${p.name} añadida al carrito`)};
-$('#cartButton').onclick=()=>$('#cart').showModal();document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$('#'+b.dataset.close).close());
-$('#cartItems').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.remove)delete cart[b.dataset.remove];else if(b.dataset.qty){const id=b.dataset.qty,p=products.find(p=>p.id===+id),next=cart[id]+Number(b.dataset.delta);if(next>Math.min(p.stock,99))return toast('No quedan más unidades disponibles');if(next<=0)delete cart[id];else cart[id]=next}persist()};
-$('#checkoutButton').onclick=()=>{$('#cart').close();$('#checkoutTotal').textContent='Total del pedido: '+money(totals().total);$('#checkoutStatus').textContent='';$('#checkout').showModal()};
-$('#checkoutForm').onsubmit=async e=>{e.preventDefault();const form=e.currentTarget,button=form.querySelector('button');button.disabled=true;try{const fields=Object.fromEntries(new FormData(form));const order=await api('orders','POST',{customer:fields,adult:fields.adult==='on',items:cartLines().map(({p,q})=>({id:p.id,quantity:q}))});cart={};persist();form.reset();$('#checkoutStatus').textContent=`Pedido ${order.id} registrado. Total: ${money(order.total)}. Pendiente de pago; no se ha realizado ningún cobro. Conserva esta referencia. La tienda debe gestionar el pago antes del envío.`;await load();button.hidden=true;}catch(err){$('#checkoutStatus').textContent=err.message}finally{button.disabled=false}};
-$('#checkoutButton').addEventListener('click',()=>{$('#checkoutForm button').hidden=false});
-async function session(){const s=await api('session');$('#login').hidden=s.authenticated;$('#dashboard').hidden=!s.authenticated;if(!s.configured)$('#loginStatus').textContent='Para activar este panel, configura ADMIN_PASSWORD en el servidor. Consulta README.md.';if(s.authenticated)await dashboard()}
-async function dashboard(){await load();renderAdminProducts();const orders=await api('orders');$('#orders').innerHTML=orders.length?orders.map(o=>{const c=JSON.parse(o.customer),items=JSON.parse(o.items);return `<article class="order"><h3>${esc(o.id)} · ${money(o.total)}</h3><small>${new Date(o.created*1000).toLocaleString('es-ES')} · ${o.status==='pending_payment'?'Pendiente de pago':esc(o.status)}</small><p>${esc(c.name)} · ${esc(c.email)}<br>${esc(c.address)}, ${esc(c.postal)} ${esc(c.city)} · España</p>${items.map(i=>`<div>${i.quantity} × ${esc(i.name)} · ${money(i.price*i.quantity)}</div>`).join('')}${o.status==='pending_payment'?`<button class="cancel-order" data-cancel-order="${esc(o.id)}">Cancelar y eliminar pedido</button>`:''}</article>`}).join(''):'<p class="muted">Todavía no hay pedidos.</p>'}
-$('#login').onsubmit=async e=>{e.preventDefault();const form=e.currentTarget,button=form.querySelector('button');button.disabled=true;$('#loginStatus').textContent='';try{await api('login','POST',{password:new FormData(form).get('password')});form.reset();await session()}catch(err){$('#loginStatus').textContent=err.message}finally{button.disabled=false}};
-$('#logout').onclick=async()=>{await api('logout','POST');await session()};
-let editorImage='', imageData='', previewUrl='';
-function previewImage(source){$('#imagePreview').hidden=!source;$('#removeImage').hidden=!source;if(source)$('#imagePreview').src=source;else $('#imagePreview').removeAttribute('src')}
-$('#productImage').onchange=()=>{const file=$('#productImage').files[0];$('#imageStatus').textContent='';imageData='';if(previewUrl)URL.revokeObjectURL(previewUrl);if(!file){previewImage(editorImage);return}if(file.size>4*1024*1024||!['image/jpeg','image/png','image/webp'].includes(file.type)){$('#imageStatus').textContent='Elige una imagen JPG, PNG o WebP de hasta 4 MB.';$('#productImage').value='';previewImage(editorImage);return}previewUrl=URL.createObjectURL(file);previewImage(previewUrl)};
-$('#removeImage').onclick=()=>{editorImage='';imageData='';$('#productImage').value='';$('#imageStatus').textContent='';if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl='';previewImage('')};
-function edit(p){editorImage=p?.image||'';imageData='';if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl='';$('#imageStatus').textContent='';previewImage(editorImage);const form=$('#productForm');form.reset();form.elements.id.value='';if(p)for(const [key,value]of Object.entries(p))if(form.elements[key])form.elements[key].value=key==='price'?value/100:value;$('#editorTitle').textContent=p?'Editar cerveza':'Nueva cerveza';$('#editorStatus').textContent=p&&!p.volume?'Completa el volumen y las existencias para ponerla a la venta.':'';$('#editor').showModal()}
-$('#newProduct').onclick=()=>edit();$('#adminProducts').onclick=async e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.edit)edit(products.find(p=>p.id===+b.dataset.edit));if(b.dataset.delete&&confirm('¿Eliminar esta cerveza del catálogo? Los pedidos existentes se conservarán.'))try{await api('products/'+b.dataset.delete,'DELETE');await dashboard()}catch(err){toast(err.message)}};
-$('#productForm').onsubmit=async e=>{e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type=submit]')||form.querySelector('.primary');const d=Object.fromEntries(new FormData(form)),id=d.id;delete d.id;for(const k of ['price','stock','abv','volume'])d[k]=Number(d[k]);d.price=Math.round(d.price*100);button.disabled=true;try{const file=$('#productImage').files[0];d.image=editorImage;if(file){const encoded=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result.split(',')[1]);reader.onerror=()=>reject(Error('No se pudo leer la imagen'));reader.readAsDataURL(file)});d.image_data=encoded;}await api('products'+(id?'/'+id:''),id?'PUT':'POST',d);$('#editor').close();await dashboard();toast('Cerveza guardada')}catch(err){$('#editorStatus').textContent=err.message}finally{button.disabled=false}};
-if(location.pathname==='/admin'){$('#store').hidden=true;$('#admin').hidden=false;session().catch(err=>toast(err.message))}else load().catch(err=>{$('#catalogStatus').textContent='No se pudo cargar el catálogo. Comprueba la conexión y recarga la página.'});
+const $ = (s) => document.querySelector(s),
+  money = (n) =>
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n / 100),
+  esc = (s) =>
+    String(s).replace(
+      /[&<>"']/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
+    );
+let products = [],
+  filter = 'Todas',
+  cart = {};
+try {
+  const saved = JSON.parse(localStorage.getItem('codex-cart') || '{}');
+  for (const [id, q] of Object.entries(saved))
+    if (/^\d+$/.test(id) && Number.isInteger(q) && q > 0 && q <= 99) cart[id] = q;
+} catch {}
+async function api(path, method = 'GET', data) {
+  const r = await fetch('/api/' + path, {
+    method,
+    headers: data ? { 'Content-Type': 'application/json' } : {},
+    body: data ? JSON.stringify(data) : undefined,
+  });
+  const raw = await r.text();
+  let result = {};
+  try {
+    result = JSON.parse(raw);
+  } catch {}
+  if (!r.ok) throw Error(result.error || 'No se pudo completar la operación');
+  return result;
+}
+let toastTimer;
+function toast(message) {
+  $('#toast').textContent = message;
+  $('#toast').style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => ($('#toast').style.display = 'none'), 3500);
+}
+function persist() {
+  try {
+    localStorage.setItem('codex-cart', JSON.stringify(cart));
+  } catch {}
+  renderCart();
+}
+async function load() {
+  products = await api('products');
+  render();
+  renderCart();
+}
+function imageCredit(p) {
+  if (!p.image_source) return '';
+  return `<div class="photo-credit"><a href="${esc(p.image_source)}" target="_blank" rel="noopener noreferrer">Foto: ${esc(p.image_credit)}</a>${p.image_license_url ? ` · <a href="${esc(p.image_license_url)}" target="_blank" rel="noopener noreferrer">${esc(p.image_license)}</a>` : ''}</div>`;
+}
+function render() {
+  const styles = ['Todas', ...new Set(products.map((p) => p.style))];
+  if (!styles.includes(filter)) filter = 'Todas';
+  $('#styles').innerHTML = styles
+    .map(
+      (s) =>
+        `<button data-filter="${esc(s)}" class="${filter === s ? 'active' : ''}">${esc(s)}</button>`,
+    )
+    .join('');
+  let list = products.filter(
+    (p) =>
+      (filter === 'Todas' || p.style === filter) &&
+      `${p.name} ${p.brewery} ${p.style}`.toLowerCase().includes($('#search').value.toLowerCase()),
+  );
+  if ($('#sort').value !== 'default')
+    list.sort((a, b) => ($('#sort').value === 'asc' ? 1 : -1) * (a.price - b.price));
+  $('#products').innerHTML = list
+    .map(
+      (p) =>
+        `<article><div class="product-image"><span class="badge">${esc(p.style.toUpperCase())}</span>${p.image ? `<img class="beer-photo" src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">` : `<div class="can" style="--beer:${/^#[0-9a-f]{6}$/i.test(p.color) ? p.color : '#b77c35'}"><div class="can-label"><small>THE BEER CODEX</small><b>${esc(p.name)}</b><span>${esc(p.style)}</span></div></div>`}</div>${imageCredit(p)}<div class="product-meta"><div><span class="brewery">${esc(p.brewery)}</span><h3>${esc(p.name)}</h3><span class="details">${esc(p.style)} · ${esc(p.abv_label || p.abv + '%')} vol. · ${p.volume ? p.volume + ' ml' : 'Formato por confirmar'}</span></div><span class="price">${money(p.price)}</span></div><p class="description">${esc(p.description)}</p><button class="add" data-add="${p.id}" ${p.stock === 0 ? 'disabled' : ''}>${p.stock ? 'Añadir al carrito' : !p.volume ? 'Pendiente de completar' : 'Sin existencias'} <span>+</span></button></article>`,
+    )
+    .join('');
+  $('#catalogStatus').textContent = list.length
+    ? `${list.length} cervezas para descubrir`
+    : 'No encontramos cervezas con esos filtros.';
+}
+function cartLines() {
+  return Object.entries(cart)
+    .map(([id, q]) => ({ p: products.find((p) => p.id === +id), q }))
+    .filter((x) => x.p);
+}
+function totals() {
+  let subtotal = cartLines().reduce((a, { p, q }) => a + p.price * q, 0);
+  return {
+    subtotal,
+    shipping: subtotal >= 6000 || !subtotal ? 0 : 490,
+    total: subtotal + (subtotal >= 6000 || !subtotal ? 0 : 490),
+  };
+}
+function renderCart() {
+  const lines = cartLines();
+  $('#count').textContent = lines.reduce((s, x) => s + x.q, 0);
+  $('#cartItems').innerHTML = lines.length
+    ? lines
+        .map(
+          ({ p, q }) =>
+            `<div class="cart-row"><div><h3>${esc(p.name)}</h3><small>${money(p.price)} · ${p.stock} disponibles</small></div><button data-qty="${p.id}" data-delta="-1" aria-label="Quitar una ${esc(p.name)}">−</button><span>${q}</span><button data-qty="${p.id}" data-delta="1" aria-label="Añadir una ${esc(p.name)}">+</button><button data-remove="${p.id}" aria-label="Eliminar ${esc(p.name)}">✕</button></div>`,
+        )
+        .join('')
+    : '<p>Tu próxima cerveza favorita te espera. Explora el catálogo para empezar.</p>';
+  const t = totals();
+  $('#cartSummary').innerHTML = lines.length
+    ? `<div class="summary-line"><span>Subtotal</span><span>${money(t.subtotal)}</span></div><div class="summary-line"><span>Envío en España</span><span>${t.shipping ? money(t.shipping) : 'Gratis'}</span></div><div class="summary-line"><strong>Total</strong><strong>${money(t.total)}</strong></div>`
+    : '';
+  $('#checkoutButton').disabled = !lines.length;
+}
+$('#styles').onclick = (e) => {
+  const b = e.target.closest('[data-filter]');
+  if (b) {
+    filter = b.dataset.filter;
+    render();
+  }
+};
+$('#search').oninput = render;
+$('#sort').onchange = render;
+$('#products').onclick = (e) => {
+  const b = e.target.closest('[data-add]');
+  if (!b) return;
+  const p = products.find((p) => p.id === +b.dataset.add);
+  if ((cart[p.id] || 0) >= Math.min(p.stock, 99)) return toast('Has alcanzado el stock disponible');
+  cart[p.id] = (cart[p.id] || 0) + 1;
+  persist();
+  toast(`${p.name} añadida al carrito`);
+};
+$('#cartButton').onclick = () => $('#cart').showModal();
+document
+  .querySelectorAll('[data-close]')
+  .forEach((b) => (b.onclick = () => $('#' + b.dataset.close).close()));
+$('#cartItems').onclick = (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.remove) delete cart[b.dataset.remove];
+  else if (b.dataset.qty) {
+    const id = b.dataset.qty,
+      p = products.find((p) => p.id === +id),
+      next = cart[id] + Number(b.dataset.delta);
+    if (next > Math.min(p.stock, 99)) return toast('No quedan más unidades disponibles');
+    if (next <= 0) delete cart[id];
+    else cart[id] = next;
+  }
+  persist();
+};
+$('#checkoutButton').onclick = () => {
+  $('#cart').close();
+  $('#checkoutTotal').textContent = 'Total del pedido: ' + money(totals().total);
+  $('#checkoutStatus').textContent = '';
+  $('#checkout').showModal();
+};
+$('#checkoutForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const form = e.currentTarget,
+    button = form.querySelector('button');
+  button.disabled = true;
+  try {
+    const fields = Object.fromEntries(new FormData(form));
+    const order = await api('orders', 'POST', {
+      customer: fields,
+      adult: fields.adult === 'on',
+      items: cartLines().map(({ p, q }) => ({ id: p.id, quantity: q })),
+    });
+    cart = {};
+    persist();
+    form.reset();
+    $('#checkoutStatus').textContent =
+      `Pedido ${order.id} registrado. Total: ${money(order.total)}. Pendiente de pago; no se ha realizado ningún cobro. Conserva esta referencia. La tienda debe gestionar el pago antes del envío.`;
+    await load();
+    button.hidden = true;
+  } catch (err) {
+    $('#checkoutStatus').textContent = err.message;
+  } finally {
+    button.disabled = false;
+  }
+};
+$('#checkoutButton').addEventListener('click', () => {
+  $('#checkoutForm button').hidden = false;
+});
+async function session() {
+  const s = await api('session');
+  $('#login').hidden = s.authenticated;
+  $('#dashboard').hidden = !s.authenticated;
+  if (!s.configured)
+    $('#loginStatus').textContent =
+      'Para activar este panel, configura ADMIN_PASSWORD en el servidor. Consulta README.md.';
+  if (s.authenticated) await dashboard();
+}
+async function dashboard() {
+  await load();
+  renderAdminProducts();
+  const orders = await api('orders');
+  $('#orders').innerHTML = orders.length
+    ? orders
+        .map((o) => {
+          const c = JSON.parse(o.customer),
+            items = JSON.parse(o.items);
+          return `<article class="order"><h3>${esc(o.id)} · ${money(o.total)}</h3><small>${new Date(o.created * 1000).toLocaleString('es-ES')} · ${o.status === 'pending_payment' ? 'Pendiente de pago' : esc(o.status)}</small><p>${esc(c.name)} · ${esc(c.email)}<br>${esc(c.address)}, ${esc(c.postal)} ${esc(c.city)} · España</p>${items.map((i) => `<div>${i.quantity} × ${esc(i.name)} · ${money(i.price * i.quantity)}</div>`).join('')}${o.status === 'pending_payment' ? `<button class="cancel-order" data-cancel-order="${esc(o.id)}">Cancelar y eliminar pedido</button>` : ''}</article>`;
+        })
+        .join('')
+    : '<p class="muted">Todavía no hay pedidos.</p>';
+}
+$('#login').onsubmit = async (e) => {
+  e.preventDefault();
+  const form = e.currentTarget,
+    button = form.querySelector('button');
+  button.disabled = true;
+  $('#loginStatus').textContent = '';
+  try {
+    await api('login', 'POST', { password: new FormData(form).get('password') });
+    form.reset();
+    await session();
+  } catch (err) {
+    $('#loginStatus').textContent = err.message;
+  } finally {
+    button.disabled = false;
+  }
+};
+$('#logout').onclick = async () => {
+  await api('logout', 'POST');
+  await session();
+};
+let editorImage = '',
+  imageData = '',
+  previewUrl = '';
+function previewImage(source) {
+  $('#imagePreview').hidden = !source;
+  $('#removeImage').hidden = !source;
+  if (source) $('#imagePreview').src = source;
+  else $('#imagePreview').removeAttribute('src');
+}
+$('#productImage').onchange = () => {
+  const file = $('#productImage').files[0];
+  $('#imageStatus').textContent = '';
+  imageData = '';
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  if (!file) {
+    previewImage(editorImage);
+    return;
+  }
+  if (
+    file.size > 4 * 1024 * 1024 ||
+    !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
+  ) {
+    $('#imageStatus').textContent = 'Elige una imagen JPG, PNG o WebP de hasta 4 MB.';
+    $('#productImage').value = '';
+    previewImage(editorImage);
+    return;
+  }
+  previewUrl = URL.createObjectURL(file);
+  previewImage(previewUrl);
+};
+$('#removeImage').onclick = () => {
+  editorImage = '';
+  imageData = '';
+  $('#productImage').value = '';
+  $('#imageStatus').textContent = '';
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = '';
+  previewImage('');
+};
+function edit(p) {
+  editorImage = p?.image || '';
+  imageData = '';
+  if (previewUrl) URL.revokeObjectURL(previewUrl);
+  previewUrl = '';
+  $('#imageStatus').textContent = '';
+  previewImage(editorImage);
+  const form = $('#productForm');
+  form.reset();
+  form.elements.id.value = '';
+  if (p)
+    for (const [key, value] of Object.entries(p))
+      if (form.elements[key]) form.elements[key].value = key === 'price' ? value / 100 : value;
+  $('#editorTitle').textContent = p ? 'Editar cerveza' : 'Nueva cerveza';
+  $('#editorStatus').textContent =
+    p && !p.volume ? 'Completa el volumen y las existencias para ponerla a la venta.' : '';
+  $('#editor').showModal();
+}
+$('#newProduct').onclick = () => edit();
+$('#adminProducts').onclick = async (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.edit) edit(products.find((p) => p.id === +b.dataset.edit));
+  if (
+    b.dataset.delete &&
+    confirm('¿Eliminar esta cerveza del catálogo? Los pedidos existentes se conservarán.')
+  )
+    try {
+      await api('products/' + b.dataset.delete, 'DELETE');
+      await dashboard();
+    } catch (err) {
+      toast(err.message);
+    }
+};
+$('#productForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const form = e.currentTarget,
+    button = form.querySelector('button[type=submit]') || form.querySelector('.primary');
+  const d = Object.fromEntries(new FormData(form)),
+    id = d.id;
+  delete d.id;
+  for (const k of ['price', 'stock', 'abv', 'volume']) d[k] = Number(d[k]);
+  d.price = Math.round(d.price * 100);
+  button.disabled = true;
+  try {
+    const file = $('#productImage').files[0];
+    d.image = editorImage;
+    if (file) {
+      const encoded = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = () => reject(Error('No se pudo leer la imagen'));
+        reader.readAsDataURL(file);
+      });
+      d.image_data = encoded;
+    }
+    await api('products' + (id ? '/' + id : ''), id ? 'PUT' : 'POST', d);
+    $('#editor').close();
+    await dashboard();
+    toast('Cerveza guardada');
+  } catch (err) {
+    $('#editorStatus').textContent = err.message;
+  } finally {
+    button.disabled = false;
+  }
+};
+if (location.pathname === '/admin') {
+  $('#store').hidden = true;
+  $('#admin').hidden = false;
+  session().catch((err) => toast(err.message));
+} else
+  load().catch((err) => {
+    $('#catalogStatus').textContent =
+      'No se pudo cargar el catálogo. Comprueba la conexión y recarga la página.';
+  });
 
-$('#orders').onclick=async e=>{const button=e.target.closest('[data-cancel-order]');if(!button)return;const id=button.dataset.cancelOrder;if(!confirm(`¿Cancelar y eliminar definitivamente el pedido ${id}? Sus unidades volverán al stock. Esta acción no se puede deshacer.`))return;button.disabled=true;try{await api('orders/'+encodeURIComponent(id),'DELETE');await dashboard();toast('Pedido cancelado y eliminado. Stock devuelto.')}catch(err){toast(err.message)}finally{button.disabled=false}};
+$('#orders').onclick = async (e) => {
+  const button = e.target.closest('[data-cancel-order]');
+  if (!button) return;
+  const id = button.dataset.cancelOrder;
+  if (
+    !confirm(
+      `¿Cancelar y eliminar definitivamente el pedido ${id}? Sus unidades volverán al stock. Esta acción no se puede deshacer.`,
+    )
+  )
+    return;
+  button.disabled = true;
+  try {
+    await api('orders/' + encodeURIComponent(id), 'DELETE');
+    await dashboard();
+    toast('Pedido cancelado y eliminado. Stock devuelto.');
+  } catch (err) {
+    toast(err.message);
+  } finally {
+    button.disabled = false;
+  }
+};
 
-function renderAdminProducts(){const normalize=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();const query=normalize($('#adminSearch').value.trim());const filtered=products.filter(p=>normalize(`${p.name} ${p.brewery} ${p.style}`).includes(query));const groups=new Map();for(const p of filtered){if(!groups.has(p.style))groups.set(p.style,[]);groups.get(p.style).push(p)}$('#adminProducts').innerHTML=[...groups].sort(([a],[b])=>a.localeCompare(b,'es')).map(([style,beers])=>`<section class="admin-style-group"><h3>${esc(style)} <span>${beers.length} ${beers.length===1?'cerveza':'cervezas'}</span></h3>${beers.map(p=>`<div class="admin-row"><strong>${esc(p.name)}</strong><span>${money(p.price)}</span><span>${p.stock} uds.</span><button data-edit="${p.id}">Editar</button><button data-delete="${p.id}">Eliminar</button></div>`).join('')}</section>`).join('')||'<p class="muted">No hay cervezas que coincidan con la búsqueda.</p>';$('#adminSearchStatus').textContent=`${filtered.length} de ${products.length} cervezas`;}
-$('#adminSearch').oninput=renderAdminProducts;
-$('#clearAdminSearch').onclick=()=>{$('#adminSearch').value='';renderAdminProducts();$('#adminSearch').focus()};
+function renderAdminProducts() {
+  const normalize = (value) =>
+    value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+  const query = normalize($('#adminSearch').value.trim());
+  const filtered = products.filter((p) =>
+    normalize(`${p.name} ${p.brewery} ${p.style}`).includes(query),
+  );
+  const groups = new Map();
+  for (const p of filtered) {
+    if (!groups.has(p.style)) groups.set(p.style, []);
+    groups.get(p.style).push(p);
+  }
+  $('#adminProducts').innerHTML =
+    [...groups]
+      .sort(([a], [b]) => a.localeCompare(b, 'es'))
+      .map(
+        ([style, beers]) =>
+          `<section class="admin-style-group"><h3>${esc(style)} <span>${beers.length} ${beers.length === 1 ? 'cerveza' : 'cervezas'}</span></h3>${beers.map((p) => `<div class="admin-row"><strong>${esc(p.name)}</strong><span>${money(p.price)}</span><span>${p.stock} uds.</span><button data-edit="${p.id}">Editar</button><button data-delete="${p.id}">Eliminar</button></div>`).join('')}</section>`,
+      )
+      .join('') || '<p class="muted">No hay cervezas que coincidan con la búsqueda.</p>';
+  $('#adminSearchStatus').textContent = `${filtered.length} de ${products.length} cervezas`;
+}
+$('#adminSearch').oninput = renderAdminProducts;
+$('#clearAdminSearch').onclick = () => {
+  $('#adminSearch').value = '';
+  renderAdminProducts();
+  $('#adminSearch').focus();
+};
