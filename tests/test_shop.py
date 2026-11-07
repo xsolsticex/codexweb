@@ -25,19 +25,32 @@ class ShopTest(unittest.TestCase):
         admin=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
         self.assertEqual(self.request('/api/chat','POST',{'text':'   '},customer)[0],400)
         self.assertEqual(self.request('/api/chat','POST',{'text':'¿Enviáis a Madrid?'},customer)[0],201)
-        self.assertEqual(self.request('/api/chat')[1],[])
-        self.assertEqual(self.request('/api/chat',client=customer)[1][0]['text'],'¿Enviáis a Madrid?')
+        self.assertEqual(self.request('/api/chat')[1]['messages'],[])
+        self.assertEqual(self.request('/api/chat',client=customer)[1]['messages'][0]['text'],'¿Enviáis a Madrid?')
         self.assertEqual(self.request('/api/chat','POST',{'text':'Otro mensaje'},customer)[0],429)
         self.assertEqual(self.request('/api/admin/chats')[0],401)
         self.request('/api/login','POST',{'password':'test-only-password'},admin)
         cid=self.request('/api/admin/chats',client=admin)[1][0]['id']
         self.assertEqual(self.request('/api/admin/chats/'+cid)[0],401)
         self.assertEqual(self.request('/api/admin/chats/'+cid,'POST',{'text':'Sí, hacemos envíos a Madrid.'},admin)[0],201)
-        rows=self.request('/api/chat',client=customer)[1]
+        rows=self.request('/api/chat',client=customer)[1]['messages']
         self.assertEqual([r['sender'] for r in rows],['customer','admin'])
         self.assertEqual(rows[-1]['text'],'Sí, hacemos envíos a Madrid.')
         self.assertEqual(self.request('/api/chat','POST',{'text':'x'*2001},customer)[0],400)
         self.assertEqual(self.request('/api/chat','DELETE',client=customer)[0],405)
+        self.assertEqual(self.request('/api/admin/chats/'+cid,'POST',{'action':'close'})[0],401)
+        self.assertEqual(self.request('/api/admin/chats/'+cid,'POST',{'action':'close'},admin)[0],200)
+        self.assertTrue(self.request('/api/chat',client=customer)[1]['closed'])
+        self.assertEqual(len(self.request('/api/chat',client=customer)[1]['messages']),2)
+        self.assertEqual(self.request('/api/chat','POST',{'text':'Mensaje tras cierre'},customer)[0],409)
+        self.assertEqual(self.request('/api/admin/chats/'+cid,'POST',{'text':'Respuesta tras cierre'},admin)[0],409)
+        self.assertEqual(self.request('/api/chat','POST',{'action':'new'},customer)[0],201)
+        self.assertEqual(self.request('/api/chat',client=customer)[1],{'messages':[],'closed':False})
+        self.assertEqual(self.request('/api/chat','POST',{'text':'Nueva consulta'},customer)[0],201)
+        self.assertEqual(self.request('/api/chat','POST',{'action':'close'},customer)[0],200)
+        self.assertTrue(self.request('/api/chat',client=customer)[1]['closed'])
+        self.assertEqual(len(self.request('/api/admin/chats/'+cid,client=admin)[1]['messages']),2)
+
 
     def test_store_serves(self):
         with urllib.request.urlopen(self.url) as r:self.assertIn(b'THE BEER',r.read())

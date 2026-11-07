@@ -48,6 +48,8 @@ def connect():
 def initialize():
     with connect() as c:
         c.executescript(CHAT_SCHEMA)
+        if 'closed' not in [r['name'] for r in c.execute('PRAGMA table_info(conversations)')]:
+            c.execute("ALTER TABLE conversations ADD COLUMN closed INTEGER NOT NULL DEFAULT 0")
         c.executescript('''CREATE TABLE IF NOT EXISTS products(id INTEGER PRIMARY KEY, name TEXT NOT NULL, brewery TEXT NOT NULL, style TEXT NOT NULL, price INTEGER NOT NULL, stock INTEGER NOT NULL, abv REAL NOT NULL, volume INTEGER NOT NULL, description TEXT NOT NULL, color TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS orders(id TEXT PRIMARY KEY, created INTEGER, customer TEXT, items TEXT, total INTEGER, status TEXT);
         CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT);''')

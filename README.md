@@ -46,3 +46,5 @@ Se incluyen 19 fotos verificadas con fuentes y créditos en [PRODUCT_PHOTOS.md](
 ## Chat de atención al cliente
 
 El botón inferior derecho abre una conversación con el administrador. Los mensajes se guardan en SQLite, y una cookie HttpOnly identifica la conversación de cada navegador durante 30 días. En `/admin`, «Consultas de clientes» permite leer y responder tras iniciar sesión. Las conversaciones se actualizan cada 5 segundos mientras la página está visible; el cliente consulta respuestas al abrir el chat. No se envían correos ni notificaciones externas, ni se promete atención inmediata. Al borrar las cookies o cambiar de navegador no se recupera la conversación anterior. Incluye la base de datos en las copias de seguridad.
+
+El cliente y el administrador pueden finalizar una conversación. Las conversaciones finalizadas conservan su historial y no admiten nuevos mensajes; el cliente puede pulsar «Nueva consulta» para comenzar otra. La bandeja de administración distingue las consultas finalizadas de las pendientes.
