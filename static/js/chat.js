@@ -2,6 +2,12 @@
 (()=>{
 const widget=document.querySelector('#supportWidget'),panel=document.querySelector('#supportPanel');
 const isAdmin=location.pathname==='/admin';widget.hidden=isAdmin;
+// Enter sends; Shift+Enter inserts a line break. Preserve IME composition.
+document.addEventListener('keydown',e=>{
+if(!e.target.matches('#supportText, #replyText')||e.key!=='Enter'||e.shiftKey||e.isComposing||e.keyCode===229)return;
+e.preventDefault();const form=e.target.form;
+if(!form.querySelector('button[type="submit"],button:not([type])').disabled)form.requestSubmit();
+});
 function messages(rows){return rows.length?rows.map(m=>`<div class="support-message ${m.sender==='admin'?'from-admin':'from-customer'}"><small>${m.sender==='admin'?'Administrador':'Cliente'} · ${new Date(m.created*1000).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</small><p>${esc(m.text)}</p></div>`).join(''):'<p class="muted">¿Dudas sobre una cerveza, un pedido o los envíos? Déjanos tu pregunta.</p>'}
 let customerVersion='',adminVersion='',selected='',busy=false,inboxBusy=false;
 async function refreshCustomer(){try{const rows=await api('chat'),version=JSON.stringify(rows);if(version!==customerVersion){$('#supportMessages').innerHTML=messages(rows);$('#supportMessages').scrollTop=$('#supportMessages').scrollHeight;customerVersion=version}$('#supportStatus').textContent=''}catch(e){$('#supportStatus').textContent=e.message}}
