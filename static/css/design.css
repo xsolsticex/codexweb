@@ -56,3 +56,11 @@ footer:before{background:#090909;top:-55px;height:56px;-webkit-mask-position:-41
 @media(max-width:800px){.metal-chain{height:70px}.hero-chain{top:-5px}.hero-copy{padding-top:65px}.philosophy>.manifesto-chain{height:50px;top:5px}}
 @media(max-width:520px){.hero-chain{height:45px;top:-2px;background-size:720px 50px}.hero-copy{padding-top:48px}.philosophy>.manifesto-chain{height:35px;background-size:720px 50px;top:6px}.philosophy{padding-top:65px}}
 @media(forced-colors:active){.metal-chain{display:none}}
+
+/* Repeat the steel detail throughout the storefront. */
+.catalog-chain{top:-12px;height:70px;opacity:.85;transform:rotate(180deg)}
+.philosophy>.manifesto-chain{opacity:1;height:75px;top:-8px}
+.footer-chain{top:-12px;height:50px;opacity:.9}
+footer{padding-top:70px}
+@media(max-width:800px){.catalog-chain{height:50px;top:-8px}.philosophy>.manifesto-chain{height:55px;top:-6px}.footer-chain{height:40px}}
+@media(max-width:520px){.catalog-chain{height:38px;top:-4px;background-size:720px 45px}.philosophy>.manifesto-chain{height:40px;top:0}.footer-chain{height:35px;background-size:720px 45px;top:-4px}footer{padding-top:58px}}
