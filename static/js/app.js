@@ -164,7 +164,7 @@ $('#checkoutForm').onsubmit = async (e) => {
     persist();
     form.reset();
     $('#checkoutStatus').textContent =
-      `Pedido ${order.id} registrado. Total: ${money(order.total)}. Pendiente de pago; no se ha realizado ningún cobro. Conserva esta referencia. La tienda debe gestionar el pago antes del envío.`;
+      `Pedido ${order.id} registrado. Total: ${money(order.total)}. Pendiente de pago; no se ha realizado ningún cobro. Conserva esta referencia. La tienda debe gestionar el pago antes del envío. ${order.email_status === 'queued' ? 'Te enviaremos un correo con el resumen del pedido. Revisa también la carpeta de spam.' : 'El correo de confirmación no está disponible en este momento. Guarda esta referencia para cualquier gestión.'}`;
     await load();
     button.hidden = true;
   } catch (err) {
@@ -194,7 +194,7 @@ async function dashboard() {
         .map((o) => {
           const c = JSON.parse(o.customer),
             items = JSON.parse(o.items);
-          return `<article class="order"><h3>${esc(o.id)} · ${money(o.total)}</h3><small>${new Date(o.created * 1000).toLocaleString('es-ES')} · ${o.status === 'pending_payment' ? 'Pendiente de pago' : esc(o.status)}</small><p>${esc(c.name)} · ${esc(c.email)}<br>${esc(c.address)}, ${esc(c.postal)} ${esc(c.city)} · España</p>${items.map((i) => `<div>${i.quantity} × ${esc(i.name)} · ${money(i.price * i.quantity)}</div>`).join('')}${o.status === 'pending_payment' ? `<button class="cancel-order" data-cancel-order="${esc(o.id)}">Cancelar y eliminar pedido</button>` : ''}</article>`;
+          return `<article class="order"><h3>${esc(o.id)} · ${money(o.total)}</h3><small>${new Date(o.created * 1000).toLocaleString('es-ES')} · ${o.status === 'pending_payment' ? 'Pendiente de pago' : esc(o.status)}</small><p class="order-email-status">${orderEmailStatus(o)}</p><p>${esc(c.name)} · ${esc(c.email)}<br>${esc(c.address)}, ${esc(c.postal)} ${esc(c.city)} · España</p>${items.map((i) => `<div>${i.quantity} × ${esc(i.name)} · ${money(i.price * i.quantity)}</div>`).join('')}${o.status === 'pending_payment' ? `<button class="cancel-order" data-cancel-order="${esc(o.id)}">Cancelar y eliminar pedido</button>` : ''}</article>`;
         })
         .join('')
     : '<p class="muted">Todavía no hay pedidos.</p>';
@@ -387,3 +387,15 @@ $('#clearAdminSearch').onclick = () => {
   renderAdminProducts();
   $('#adminSearch').focus();
 };
+
+function orderEmailStatus(order) {
+  if (order.email_status === 'sent') return 'Correo de confirmación enviado';
+  if (order.email_status === 'not_configured')
+    return 'Correo pendiente: configura el servicio de correo en el servidor';
+  if (order.email_status === 'processing') return 'Enviando correo de confirmación';
+  if (order.email_status === 'pending')
+    return order.email_attempts > 0
+      ? 'Correo pendiente: se reintentará el envío'
+      : 'Correo de confirmación en cola';
+  return 'Sin correo de confirmación (pedido anterior)';
+}

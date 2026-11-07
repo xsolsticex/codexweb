@@ -1,6 +1,12 @@
 import json, os, sqlite3, secrets, hashlib, hmac, time, base64, io, re, warnings
 from PIL import Image, UnidentifiedImageError
 from chat import SCHEMA as CHAT_SCHEMA, handle as handle_chat
+from order_email import (
+    SCHEMA as EMAIL_SCHEMA,
+    valid_email,
+    configured as email_configured,
+    start_worker,
+)
 from catalog_import import import_once
 from photo_catalog import apply_photos, catalog_image_exists, with_photo_credit
 from pathlib import Path
@@ -59,6 +65,7 @@ def connect():
 def initialize():
     with connect() as c:
         c.executescript(CHAT_SCHEMA)
+        c.executescript(EMAIL_SCHEMA)
         if "closed" not in [r["name"] for r in c.execute("PRAGMA table_info(conversations)")]:
             c.execute("ALTER TABLE conversations ADD COLUMN closed INTEGER NOT NULL DEFAULT 0")
         c.executescript(
@@ -210,7 +217,16 @@ class Handler(SimpleHTTPRequestHandler):
             if not self.admin():
                 return self.send_json(401, {"error": "Inicia sesión"})
             with connect() as c:
-                rows = [dict(r) for r in c.execute("SELECT * FROM orders ORDER BY created DESC")]
+                rows = [
+                    dict(r)
+                    for r in c.execute(
+                        """SELECT o.*,q.status AS email_status,q.attempts AS email_attempts
+                    FROM orders o LEFT JOIN order_email_outbox q ON q.order_id=o.id ORDER BY o.created DESC"""
+                    )
+                ]
+                for row in rows:
+                    if row["email_status"] in ("pending", "processing") and not email_configured():
+                        row["email_status"] = "not_configured"
             return self.send_json(200, rows)
         if route.startswith("/api/"):
             return self.send_json(404, {"error": "No encontrado"})
@@ -282,7 +298,7 @@ class Handler(SimpleHTTPRequestHandler):
                 ):
                     raise ValueError("Completa tus datos de envío")
                 if (
-                    "@" not in customer["email"]
+                    not valid_email(customer["email"])
                     or not customer["postal"].isdigit()
                     or len(customer["postal"]) != 5
                 ):
@@ -322,7 +338,16 @@ class Handler(SimpleHTTPRequestHandler):
                             "pending_payment",
                         ),
                     )
-                return self.send_json(201, {"id": oid, "total": total, "status": "pending_payment"})
+                    c.execute("INSERT INTO order_email_outbox(order_id) VALUES(?)", (oid,))
+                return self.send_json(
+                    201,
+                    {
+                        "id": oid,
+                        "total": total,
+                        "status": "pending_payment",
+                        "email_status": "queued" if email_configured() else "not_configured",
+                    },
+                )
             if not self.admin():
                 return self.send_json(401, {"error": "Inicia sesión"})
             if route.startswith("/api/orders/") and self.command == "DELETE":
@@ -343,6 +368,7 @@ class Handler(SimpleHTTPRequestHandler):
                             "UPDATE products SET stock=stock+? WHERE id=?",
                             (item["quantity"], item["id"]),
                         )
+                    c.execute("DELETE FROM order_email_outbox WHERE order_id=?", (oid,))
                     c.execute("DELETE FROM orders WHERE id=?", (oid,))
                 return self.send_json(200, {"ok": True})
             if route.startswith("/api/products"):
@@ -428,4 +454,11 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     initialize()
-    ThreadingHTTPServer(("0.0.0.0", int(os.environ.get("PORT", "3000"))), Handler).serve_forever()
+    stop, worker = start_worker(connect)
+    http = ThreadingHTTPServer(("0.0.0.0", int(os.environ.get("PORT", "3000"))), Handler)
+    try:
+        http.serve_forever()
+    finally:
+        stop.set()
+        http.server_close()
+        worker.join(timeout=20)

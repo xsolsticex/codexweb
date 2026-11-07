@@ -28,7 +28,7 @@ El importador convierte los precios a céntimos, conserva rangos de graduación 
 
 Los precios se calculan en el servidor en céntimos. Registrar un pedido descuenta existencias dentro de una transacción y lo guarda como `pending_payment`. Envío: 4,90 €, gratis desde 60 €. Estas tarifas son provisionales; no incorporan restricciones territoriales del transportista.
 
-**No hay cobro online, envío de correo ni facturación.** El checkout indica que el pedido queda pendiente de pago. El administrador puede consultar referencia, cliente, dirección, productos y total. Antes del lanzamiento comercial hay que elegir e integrar la pasarela (con webhooks de confirmación), definir liberación de reservas/cancelaciones, transportista, condiciones de venta y textos de privacidad. No introduzcas datos de tarjeta en esta versión.
+**No hay cobro online ni facturación.** El checkout indica que el pedido queda pendiente de pago. El administrador puede consultar referencia, cliente, dirección, productos y total. Antes del lanzamiento comercial hay que elegir e integrar la pasarela (con webhooks de confirmación), definir liberación de reservas/cancelaciones, transportista, condiciones de venta y textos de privacidad. No introduzcas datos de tarjeta en esta versión.
 
 La web solicita confirmación de mayoría de edad; no verifica identidad. El nombre, país y moneda corresponden a The Beer Codex, España y EUR. El catálogo inicial y los nombres de cerveceras son ejemplos que debes sustituir.
 
@@ -52,3 +52,30 @@ El cliente y el administrador pueden finalizar una conversación. Las conversaci
 El administrador puede eliminar definitivamente un chat finalizado y sus mensajes desde la conversación, previa confirmación. Las conversaciones abiertas no se pueden eliminar.
 
 En administración, «Cancelar y eliminar pedido» elimina definitivamente un pedido pendiente de pago tras confirmar y devuelve sus cantidades al stock de los productos que sigan existiendo. La operación es atómica y no admite pedidos con otro estado. No realiza reembolsos ni envía avisos al cliente.
+
+## Correos de confirmación de pedidos
+
+Cada pedido nuevo guarda, en la misma transacción que reserva el stock, un correo pendiente en SQLite. El servidor lo envía en segundo plano usando SMTP con TLS. Incluye referencia, fecha de Madrid, productos, unidades, precios, subtotal, envío, total y dirección de entrega. Aclara que el pedido está pendiente de pago y permite responder al remitente para gestionar la compra. Incluye versiones HTML y texto.
+
+Configura estas variables en el entorno del servidor antes de iniciarlo, usando los datos de tu proveedor de correo:
+
+- `SMTP_HOST`: servidor SMTP.
+- `SMTP_PORT`: 587 para STARTTLS (predeterminado) o 465 para SSL.
+- `SMTP_SECURITY`: `starttls` (predeterminado) o `ssl`; ambos verifican el certificado TLS.
+- `SMTP_USERNAME` y `SMTP_PASSWORD`: usuario y contraseña del proveedor, si requiere autenticación. Guárdalos como secretos, sin añadirlos al repositorio.
+- `MAIL_FROM`: remitente autorizado, por ejemplo `The Beer Codex <pedidos@tu-dominio.es>`.
+- `MAIL_REPLY_TO`: dirección para gestiones; por defecto usa la dirección de `MAIL_FROM`.
+
+El remitente/dominio debe estar verificado en el proveedor (SPF/DKIM según sus instrucciones). Reinicia el servidor tras configurar las variables. Sin SMTP no se afirma que el correo haya sido enviado: el pedido se conserva, la confirmación solicita guardar su referencia y administración indica que falta configurar el correo.
+
+Los fallos de envío se reintentan automáticamente con espera progresiva de 30 segundos a una hora; la cola sobrevive a reinicios. Administración muestra si el correo está pendiente, enviándose o enviado. «Enviado» significa aceptado por el servidor SMTP; no garantiza entrega en la bandeja de entrada. Una interrupción justo después de la aceptación SMTP puede causar un reenvío: se conserva el mismo Message-ID para facilitar la detección de duplicados. Al eliminar un pedido se elimina también su correo pendiente; un correo ya enviado no se puede retirar. Los pedidos anteriores a esta función no generan correos retroactivos. No se envían correos por el chat ni por cancelación de pedidos.
+
+### Configuración con Gmail
+
+1. En la cuenta Gmail que enviará los pedidos, activa la verificación en dos pasos y genera una **contraseña de aplicación** en la cuenta de Google. Algunas cuentas de empresa o con restricciones no permiten contraseñas de aplicación; en ese caso consulta al administrador de Google Workspace.
+2. En las variables/secretos del alojamiento configura `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_SECURITY=starttls` y `SMTP_USERNAME` con la dirección Gmail completa.
+3. Guarda la contraseña de aplicación como secreto `SMTP_PASSWORD`. No uses la contraseña habitual de Google.
+4. Configura `MAIL_FROM` con esa misma dirección (`The Beer Codex <tu-cuenta@gmail.com>`) y `MAIL_REPLY_TO` con el correo donde atenderás las consultas.
+5. Reinicia el servidor y realiza un pedido de prueba con una dirección tuya. Comprueba su recepción y el estado del correo en administración. Gmail aplica sus límites de envío y puede filtrar mensajes como spam.
+
+No hace falta instalar paquetes adicionales para enviar correos: se utiliza la biblioteca estándar de Python.

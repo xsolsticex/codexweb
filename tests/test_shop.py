@@ -182,8 +182,21 @@ class ShopTest(unittest.TestCase):
         code, result = self.request("/api/orders", "POST", order)
         self.assertEqual(code, 201)
         path = "/api/orders/" + result["id"]
+        with server.connect() as c:
+            self.assertEqual(
+                c.execute(
+                    "SELECT status FROM order_email_outbox WHERE order_id=?", (result["id"],)
+                ).fetchone()[0],
+                "pending",
+            )
         self.assertEqual(self.request(path, "DELETE")[0], 401)
         self.assertEqual(self.request(path, "DELETE", client=admin)[0], 200)
+        with server.connect() as c:
+            self.assertIsNone(
+                c.execute(
+                    "SELECT 1 FROM order_email_outbox WHERE order_id=?", (result["id"],)
+                ).fetchone()
+            )
         self.assertEqual(self.request("/api/products")[1][0]["stock"], p["stock"])
         self.assertEqual(self.request(path, "DELETE", client=admin)[0], 404)
         self.assertEqual(self.request("/api/products")[1][0]["stock"], p["stock"])
