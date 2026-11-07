@@ -50,3 +50,5 @@ footer:before{background:#090909;top:-55px;height:56px;-webkit-mask-position:-41
 @media(max-width:520px){.hero-photo{inset:16px 30px 20px 8px;width:calc(100% - 38px);height:calc(100% - 36px);object-position:center;-webkit-mask-image:none;mask-image:none;transform:rotate(2deg)}}
 
 .cancel-order{margin-top:18px;border-color:#a83232;color:#edaaa0;font-size:11px}.cancel-order:hover{background:#6d2024;color:#fff0e5}
+
+.admin-style-group{margin:28px 0 36px}.admin-style-group>h3{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:0;padding:15px 18px;border-left:4px solid #c52329;background:#211719;color:#e3dbce;font-size:18px}.admin-style-group>h3>span{font:11px Arial,sans-serif;color:#b5a69a}.admin-style-group .admin-row{padding-inline:18px}@media(max-width:520px){.admin-style-group>h3{font-size:16px}.admin-style-group .admin-row{padding-inline:10px}}
