@@ -48,3 +48,11 @@ footer:before{background:#090909;top:-55px;height:56px;-webkit-mask-position:-41
 .hero-photo{inset:18px 22px 28px 12px;width:calc(100% - 34px);height:calc(100% - 46px);object-fit:contain;object-position:center;-webkit-mask-image:none;mask-image:none;transform:rotate(2deg);filter:drop-shadow(8px 12px 8px #000b)}
 @media(max-width:800px){.hero-photo{inset:20px 18px 25px 8px;width:calc(100% - 26px);height:calc(100% - 45px);object-position:center}}
 @media(max-width:520px){.hero-photo{inset:16px 30px 20px 8px;width:calc(100% - 38px);height:calc(100% - 36px);object-position:center;-webkit-mask-image:none;mask-image:none;transform:rotate(2deg)}}
+
+/* Forged steel chains frame the artwork and the manifesto. */
+.metal-chain{position:absolute;left:0;width:100%;height:100px;background:url('/images/chain.svg') center top/100% 100% no-repeat;pointer-events:none;filter:drop-shadow(0 5px 3px #000a);z-index:2}
+.hero-chain{top:0;opacity:.8;transform:rotate(-1deg);transform-origin:center}
+.philosophy>.manifesto-chain{top:4px;display:block;color:inherit;font-size:inherit;opacity:.7;transform:rotate(180deg);height:65px}
+@media(max-width:800px){.metal-chain{height:70px}.hero-chain{top:-5px}.hero-copy{padding-top:65px}.philosophy>.manifesto-chain{height:50px;top:5px}}
+@media(max-width:520px){.hero-chain{height:45px;top:-2px;background-size:720px 50px}.hero-copy{padding-top:48px}.philosophy>.manifesto-chain{height:35px;background-size:720px 50px;top:6px}.philosophy{padding-top:65px}}
+@media(forced-colors:active){.metal-chain{display:none}}
