@@ -20,6 +20,25 @@ class ShopTest(unittest.TestCase):
             with (client or urllib.request.build_opener()).open(req) as r:
                 raw=r.read();return r.status,json.loads(raw) if raw else None
         except urllib.error.HTTPError as e:return e.code,json.loads(e.read())
+    def test_support_chat_privacy_reply_and_validation(self):
+        customer=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+        admin=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+        self.assertEqual(self.request('/api/chat','POST',{'text':'   '},customer)[0],400)
+        self.assertEqual(self.request('/api/chat','POST',{'text':'¿Enviáis a Madrid?'},customer)[0],201)
+        self.assertEqual(self.request('/api/chat')[1],[])
+        self.assertEqual(self.request('/api/chat',client=customer)[1][0]['text'],'¿Enviáis a Madrid?')
+        self.assertEqual(self.request('/api/chat','POST',{'text':'Otro mensaje'},customer)[0],429)
+        self.assertEqual(self.request('/api/admin/chats')[0],401)
+        self.request('/api/login','POST',{'password':'test-only-password'},admin)
+        cid=self.request('/api/admin/chats',client=admin)[1][0]['id']
+        self.assertEqual(self.request('/api/admin/chats/'+cid)[0],401)
+        self.assertEqual(self.request('/api/admin/chats/'+cid,'POST',{'text':'Sí, hacemos envíos a Madrid.'},admin)[0],201)
+        rows=self.request('/api/chat',client=customer)[1]
+        self.assertEqual([r['sender'] for r in rows],['customer','admin'])
+        self.assertEqual(rows[-1]['text'],'Sí, hacemos envíos a Madrid.')
+        self.assertEqual(self.request('/api/chat','POST',{'text':'x'*2001},customer)[0],400)
+        self.assertEqual(self.request('/api/chat','DELETE',client=customer)[0],405)
+
     def test_store_serves(self):
         with urllib.request.urlopen(self.url) as r:self.assertIn(b'THE BEER',r.read())
         code,products=self.request('/api/products');self.assertEqual(code,200);self.assertEqual(len(products),6)

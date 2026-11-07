@@ -42,3 +42,7 @@ node --check static/js/app.js
 ## Fotografías del catálogo
 
 Se incluyen 19 fotos verificadas con fuentes y créditos en [PRODUCT_PHOTOS.md](PRODUCT_PHOTOS.md). El servidor las asigna una sola vez a los productos con el mismo nombre y sin foto. Se conservan las fotos subidas por administración; reemplazar o quitar una foto no se deshace al reiniciar. Los archivos forman parte del repositorio, por lo que no se necesita acceso externo al servirlas. Las 21 entradas restantes mantienen la ilustración provisional.
+
+## Chat de atención al cliente
+
+El botón inferior derecho abre una conversación con el administrador. Los mensajes se guardan en SQLite, y una cookie HttpOnly identifica la conversación de cada navegador durante 30 días. En `/admin`, «Consultas de clientes» permite leer y responder tras iniciar sesión. Las conversaciones se actualizan cada 5 segundos mientras la página está visible; el cliente consulta respuestas al abrir el chat. No se envían correos ni notificaciones externas, ni se promete atención inmediata. Al borrar las cookies o cambiar de navegador no se recupera la conversación anterior. Incluye la base de datos en las copias de seguridad.

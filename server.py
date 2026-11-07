@@ -1,5 +1,6 @@
 import json, os, sqlite3, secrets, hashlib, hmac, time, base64, io, re, warnings
 from PIL import Image, UnidentifiedImageError
+from chat import SCHEMA as CHAT_SCHEMA, handle as handle_chat
 from catalog_import import import_once
 from photo_catalog import apply_photos, catalog_image_exists, with_photo_credit
 from pathlib import Path
@@ -46,6 +47,7 @@ def connect():
 
 def initialize():
     with connect() as c:
+        c.executescript(CHAT_SCHEMA)
         c.executescript('''CREATE TABLE IF NOT EXISTS products(id INTEGER PRIMARY KEY, name TEXT NOT NULL, brewery TEXT NOT NULL, style TEXT NOT NULL, price INTEGER NOT NULL, stock INTEGER NOT NULL, abv REAL NOT NULL, volume INTEGER NOT NULL, description TEXT NOT NULL, color TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS orders(id TEXT PRIMARY KEY, created INTEGER, customer TEXT, items TEXT, total INTEGER, status TEXT);
         CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT);''')
@@ -62,9 +64,11 @@ def initialize():
 
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self,*a,**kw): super().__init__(*a,directory=str(ROOT / 'static'),**kw)
-    def send_json(self,status,value):
+    def send_json(self,status,value,cookie=None):
         raw=json.dumps(value,ensure_ascii=False).encode()
-        self.send_response(status); self.send_header('Content-Type','application/json; charset=utf-8'); self.send_header('Cache-Control','no-store'); self.end_headers(); self.wfile.write(raw)
+        self.send_response(status)
+        if cookie: self.send_header('Set-Cookie',cookie)
+        self.send_header('Content-Type','application/json; charset=utf-8'); self.send_header('Cache-Control','no-store'); self.end_headers(); self.wfile.write(raw)
     def body(self):
         size=int(self.headers.get('Content-Length','0'))
         if size<0 or size>6*1024*1024: raise ValueError('Solicitud demasiado grande')
@@ -75,6 +79,8 @@ class Handler(SimpleHTTPRequestHandler):
         return token and SESSIONS.get(token.value,0)>time.time()
     def do_GET(self):
         route=self.path.split('?')[0]
+        if route == '/api/chat' or route.startswith('/api/admin/chats'):
+            return handle_chat(self, route, connect)
         if route.startswith('/uploads/'):
             if not re.fullmatch(r'/uploads/[a-f0-9]{32}\.webp', route): return self.send_error(404)
             path = DATA / 'uploads' / route.rsplit('/',1)[-1]
@@ -106,6 +112,8 @@ class Handler(SimpleHTTPRequestHandler):
         if origin and origin.split('://')[-1]!=self.headers.get('Host'): return self.send_json(403,{'error':'Origen no permitido'})
         try:
             route=self.path
+            if route == '/api/chat' or route.startswith('/api/admin/chats'):
+                return handle_chat(self, route, connect)
             if route=='/api/login' and self.command=='POST':
                 data=self.body(); expected=os.environ.get('ADMIN_PASSWORD','')
                 if not expected: return self.send_json(503,{'error':'Configura ADMIN_PASSWORD en el servidor para activar la administración.'})
